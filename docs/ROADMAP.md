@@ -11,14 +11,15 @@ This is a working plan, not a fixed commitment. Each milestone should produce a 
 - [x] Scaffold frontend
 - [x] Study-space list using clearly labelled mock data
 - [x] Basic sorting and accessible states (pending device testing)
-- [ ] Iterate on phone-size UI after hands-on testing
+- [x] Refactor to fixed app shell, separate list scrolling, and bottom sheets
+- [ ] Validate the revised experience on a real phone
 
 ## 2. Location and map
 - [ ] Curate and verify a small UBC study-zone dataset
 - [ ] Ask for location permission only when useful; manual fallback
 - [ ] Distance sorting using real position (mock sorting exists)
 - [ ] Interactive map and actual walking-time estimates
-- [ ] External directions (prototype link exists)
+- [ ] External directions (prototype links exist)
 
 ## 3. Working reporting backend
 - [ ] Database schema and API

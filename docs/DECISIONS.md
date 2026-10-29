@@ -40,18 +40,25 @@ Record meaningful product and technical decisions here as the project evolves. K
 
 **Why:** A list is faster for comparing busyness and walking time; a full-screen map remains easily available for spatial exploration without crowding the default mobile screen.
 
-**Follow-up:** Refine study-space cards and exact crowding states, then prototype the mobile UI. Map implementation, ranking formula, data sources, and push-reminder details remain open.
+## 2026-10-28 — Mobile app-style interaction refactor
+
+**Status:** Implemented in frontend prototype, pending phone testing.
+
+**Decision:** Use a viewport-height app shell with a persistent header, sorting controls, and two-button bottom navigation (**Explore / Report**). The study-space list scrolls independently. Cards open a bottom sheet instead of expanding in the page; Report opens a separate one-tap selection preview. Support subtle transitions, accessible focus handling, and reduced-motion preferences.
+
+**Why:** On-phone testing found whole-page scrolling and static interactions made the first version feel like a website, not an app. Content should scroll within the main region while primary controls remain immediately accessible.
+
+**Scope:** No true submissions, locations, crowd estimates, or map integration are implemented. All data is still mock data.
 
 ## Open decisions
 
 | Topic | Questions |
 | --- | --- |
-| Study-space cards | Exact visual hierarchy, busyness labels, report freshness presentation, and interactions? |
-| Scope | Which buildings and study zones launch first? |
+| Study-space data | Which verified study zones will replace the demo locations? |
 | Location | When should location be requested and how does manual selection work? |
 | Reports | What age limit, weighting, and confidence rules are appropriate? |
 | Identity | Anonymous, pseudonymous, or accounts? |
-| Stack | Which frontend, backend, and database offer the simplest maintainable implementation? |
+| Stack | Backend and database choices? |
 | Recommendations | What initial, transparent ranking rules should be used? |
 | Notifications | Should directions trigger an opt-in reminder after walking time + a grace period? |
 | Deployment | Hosting, costs, and maintenance plan? |
