@@ -13,6 +13,12 @@ coverage/
 *.pem
 *.key
 
+# SQLite state (including WAL/SHM companion files)
+server/data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
 # Editors and OS files
 .DS_Store
 Thumbs.db
