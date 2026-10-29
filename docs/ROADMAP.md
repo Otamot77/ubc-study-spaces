@@ -19,7 +19,7 @@ This is a working plan, not a fixed commitment. Each milestone should produce a 
 - [ ] Ask for location permission only when useful; manual fallback
 - [ ] Distance sorting using real position (mock sorting exists)
 - [x] Real interactive map with sourced building-level pins and selection sync
-- [ ] Real walking-time estimates from a pedestrian routing service
+- [ ] Real walking-time estimates (later; first prototype uses Google Maps for external navigation)
 - [ ] External directions (prototype links exist)
 
 ## 3. Working reporting backend

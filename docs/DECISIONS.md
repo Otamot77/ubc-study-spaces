@@ -87,3 +87,13 @@ Use this template:
 **Why:** The first map obscured too much of the viewport, recentered inadequately, and contained more basemap labels and controls than useful for choosing a study space.
 
 **Constraint:** No CARTO key is configured, so this does not switch to a provider that would display an API-key watermark. Sample crowding and travel times remain explicitly illustrative.
+
+## 2026-10-29 — Brighter occupancy palette and external navigation
+
+**Status:** Accepted for the first prototype; to be reviewed on-device.
+
+**Decision:** Preserve the quiet basemap and simple app layout, but use brighter teal (plenty of seats), amber (some seats), and coral (almost full) markers, plus a neutral slate tone for unknown. The same status categories use darker corresponding text and lightly tinted backgrounds for legibility. Keep navigation through an external Google Maps walking-directions link instead of building in-app turn-by-turn routing.
+
+**Why:** The previous traffic-light palette felt dull, particularly against the intentionally muted basemap. The product's value comes from occupancy discovery, not duplicating a navigation app.
+
+**Limit:** All occupancy levels and walking-minute estimates displayed in this design remain fictional; map coordinates represent approximate real building locations.

@@ -30,6 +30,8 @@ npm run preview
 - Details sheet provides external Google Maps directions and a reporting preview
 - Report tab launches a three-choice reporting sheet with a location selector
 - Map mode shows all eight building pins on a visually simplified OpenStreetMap basemap; selecting a marker recentres it above a small detail preview
+- Bright teal, amber and coral pins indicate **sample** seat availability (unknown is neutral grey); status text uses darker matching colours for readability
+- For the first prototype, **Get directions** opens Google Maps walking directions instead of building an in-app routing system
 
 The details and report sheets support Escape to close, backdrop dismissal, and keyboard focus cycling. Animations are disabled when reduced motion is preferred.
 
