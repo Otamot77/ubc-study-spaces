@@ -10,7 +10,21 @@ Open the app, see nearby study spaces, compare **recently reported** busyness an
 
 A lack of recent reports means **unknown**, never "empty."
 
-## Proposed MVP (not yet implemented)
+## Frontend prototype
+
+The first **React + TypeScript** UI prototype is now in [`web/`](web/). It has compact cards, demo sorting, a List / Map toggle, and a reporting interaction preview.
+
+```sh
+cd web
+npm install
+npm run dev
+```
+
+See [frontend instructions](web/README.md) for build and test commands.
+
+**Important:** All displayed walking times, crowding levels, report counts, and rankings are **fictional sample data**. The map is a placeholder; real location and reporting services are not connected. This is not yet a deployed PWA.
+
+## Proposed MVP (subject to change)
 
 - Mobile-first list of curated study spaces
 - Optional location-based discovery, with manual fallback
@@ -19,18 +33,8 @@ A lack of recent reports means **unknown**, never "empty."
 - Honest timestamps and handling of stale or conflicting reports
 - Persistent backend and automated tests
 
-## Possible next steps
-
-Interactive campus map, walking-time estimates, a Google Maps directions handoff, optional delayed Web Push reminders, and eventually historical busyness trends if real data supports them.
-
-## Status
-
-**Planning and repository setup.** No live app, occupancy observations, or final technology choices yet.
-
 ## Documentation
 
 - [Product vision](docs/PRODUCT.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Decision log](docs/DECISIONS.md)
-
-Development instructions will be added with the first application scaffold.

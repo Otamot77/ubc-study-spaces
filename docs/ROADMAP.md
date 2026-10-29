@@ -4,24 +4,25 @@ This is a working plan, not a fixed commitment. Each milestone should produce a 
 
 ## 0. Foundation
 - [x] Initialize repo and project documentation
-- [ ] Capture initial UI sketches and choose MVP boundaries
-- [ ] Choose frontend/backend stack based on requirements
+- [x] Agree on list-first UI, full-screen map alternative, and compact cards
+- [x] Choose initial React + TypeScript frontend stack (backend open)
 
 ## 1. Mobile-first discovery prototype
-- [ ] Scaffold frontend
-- [ ] Study-space list using clearly labelled mock data
-- [ ] Basic sorting and accessible states
-- [ ] Iterate on phone-size UI
+- [x] Scaffold frontend
+- [x] Study-space list using clearly labelled mock data
+- [x] Basic sorting and accessible states (pending device testing)
+- [ ] Iterate on phone-size UI after hands-on testing
 
 ## 2. Location and map
 - [ ] Curate and verify a small UBC study-zone dataset
 - [ ] Ask for location permission only when useful; manual fallback
-- [ ] Distance sorting and optional map
-- [ ] Walking-time estimates and external directions
+- [ ] Distance sorting using real position (mock sorting exists)
+- [ ] Interactive map and actual walking-time estimates
+- [ ] External directions (prototype link exists)
 
 ## 3. Working reporting backend
 - [ ] Database schema and API
-- [ ] One-tap crowd reports
+- [ ] One-tap crowd reports (UI-only preview exists)
 - [ ] Recent-report display and stale/unknown states
 - [ ] Basic automated tests and public deployment
 
