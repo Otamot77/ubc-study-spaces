@@ -10,8 +10,6 @@ interface Props {
   onSelect: (id: string) => void
 }
 
-// OpenStreetMap tiles remain the key-free default. Only the tile imagery is
-// visually subdued in CSS; markers, controls and attribution stay clear.
 const TILE_URL = import.meta.env.VITE_MAP_TILE_URL || 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
 
 function markerIcon(busyness: Busyness, selected: boolean): L.DivIcon {
@@ -24,25 +22,27 @@ function markerIcon(busyness: Busyness, selected: boolean): L.DivIcon {
 }
 
 function focusOnMarker(map: L.Map, space: StudySpace) {
-  // The compact card overlays the bottom ~105px of the map. Centre the pin
-  // within the remaining visible region, rather than the whole map element.
   const zoom = Math.max(15, map.getZoom())
   const markerPoint = map.project([space.coordinates.lat, space.coordinates.lng], zoom)
+  // Shift the centre down by half the compact detail card's height.
   const centrePoint = markerPoint.add(L.point(0, 54))
   const centre = map.unproject(centrePoint, zoom)
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
   map.flyTo(centre, zoom, { animate: !reducedMotion, duration: 0.42 })
 }
 
-/** Real building pins, with no request for the user's own location. */
+/**
+ * Initialise Leaflet exactly once per visible map. Report polling updates markers
+ * without resetting the user's pan/zoom context every 30 seconds.
+ */
 export function CampusMap({ spaces, selectedId, onSelect }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<L.Map | null>(null)
   const markersRef = useRef<Map<string, L.Marker>>(new Map())
   const onSelectRef = useRef(onSelect)
+  const spacesRef = useRef(spaces)
+  spacesRef.current = spaces
 
-  // A stable callback ref avoids rebuilding Leaflet when selection changes.
   useEffect(() => { onSelectRef.current = onSelect }, [onSelect])
 
   useEffect(() => {
@@ -63,26 +63,15 @@ export function CampusMap({ spaces, selectedId, onSelect }: Props) {
     }).addTo(map)
     L.control.zoom({ position: 'topright' }).addTo(map)
 
-    spaces.forEach((space) => {
-      const marker = L.marker([space.coordinates.lat, space.coordinates.lng], {
-        icon: markerIcon(space.busyness, space.id === selectedId),
-        zIndexOffset: space.id === selectedId ? 1000 : 0,
-        title: space.name,
-        alt: space.name,
-        keyboard: true,
-      }).addTo(map)
-      const tooltip = document.createElement('span')
-      tooltip.textContent = space.name
-      marker.bindTooltip(tooltip, { direction: 'top', offset: [0, -10] })
-      marker.on('click', () => onSelectRef.current(space.id))
-      markersRef.current.set(space.id, marker)
-    })
-
-    // The initial state is a whole-campus overview, not an arbitrary first pin.
-    const bounds = L.latLngBounds(spaces.map(
-      (space) => [space.coordinates.lat, space.coordinates.lng] as L.LatLngTuple,
-    ))
-    map.fitBounds(bounds, { padding: [36, 48], maxZoom: 15 })
+    const initial = spacesRef.current
+    if (initial.length) {
+      const bounds = L.latLngBounds(initial.map(
+        (space) => [space.coordinates.lat, space.coordinates.lng] as L.LatLngTuple,
+      ))
+      map.fitBounds(bounds, { padding: [36, 48], maxZoom: 15 })
+    } else {
+      map.setView([49.2652, -123.2515], 15)
+    }
 
     const frame = requestAnimationFrame(() => map.invalidateSize())
     return () => {
@@ -91,33 +80,57 @@ export function CampusMap({ spaces, selectedId, onSelect }: Props) {
       markersRef.current.clear()
       mapRef.current = null
     }
-    // Static map marker data. List sorting never mutates this array.
-  }, [spaces])
+  }, [])
 
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
+    const seen = new Set<string>()
 
-    spaces.forEach((space) => {
-      const marker = markersRef.current.get(space.id)
-      if (marker) {
-        marker.setIcon(markerIcon(space.busyness, space.id === selectedId))
-        marker.setZIndexOffset(space.id === selectedId ? 1000 : 0)
+    for (const space of spaces) {
+      seen.add(space.id)
+      let marker = markersRef.current.get(space.id)
+      if (!marker) {
+        marker = L.marker([space.coordinates.lat, space.coordinates.lng], {
+          icon: markerIcon(space.busyness, space.id === selectedId),
+          zIndexOffset: space.id === selectedId ? 1000 : 0,
+          title: space.name,
+          alt: space.name,
+          keyboard: true,
+        }).addTo(map)
+        const tooltip = document.createElement('span')
+        tooltip.textContent = space.name
+        marker.bindTooltip(tooltip, { direction: 'top', offset: [0, -10] })
+        marker.on('click', () => onSelectRef.current(space.id))
+        markersRef.current.set(space.id, marker)
+      } else {
+        marker.setLatLng([space.coordinates.lat, space.coordinates.lng])
       }
-    })
-
-    if (selectedId) {
-      const selected = spaces.find((space) => space.id === selectedId)
-      if (selected) focusOnMarker(map, selected)
+      marker.setIcon(markerIcon(space.busyness, space.id === selectedId))
+      marker.setZIndexOffset(space.id === selectedId ? 1000 : 0)
     }
-  }, [selectedId, spaces])
+
+    for (const [id, marker] of markersRef.current) {
+      if (!seen.has(id)) {
+        marker.remove()
+        markersRef.current.delete(id)
+      }
+    }
+  }, [spaces, selectedId])
+
+  useEffect(() => {
+    const map = mapRef.current
+    const selected = spacesRef.current.find((space) => space.id === selectedId)
+    if (map && selected) focusOnMarker(map, selected)
+    // Only recenter for an actual selection; report updates must not move the map.
+  }, [selectedId])
 
   return (
     <div
       className="campus-map"
       ref={containerRef}
       role="region"
-      aria-label="Interactive map of eight UBC Vancouver buildings"
+      aria-label="Interactive map of UBC Vancouver study-space buildings"
     />
   )
 }
