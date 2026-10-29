@@ -17,9 +17,9 @@ function markerIcon(busyness: Busyness, selected: boolean): L.DivIcon {
   return L.divIcon({
     // No user-controlled HTML is inserted into the marker.
     className: `study-pin study-pin--${busyness}${selected ? ' study-pin--selected' : ''}`,
-    html: '<span class="study-pin__centre" aria-hidden="true"></span>',
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
+    // A plain solid dot reads more like a map marker than a decorative badge.
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
   })
 }
 

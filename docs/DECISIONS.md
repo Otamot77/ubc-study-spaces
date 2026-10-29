@@ -97,3 +97,13 @@ Use this template:
 **Why:** The previous traffic-light palette felt dull, particularly against the intentionally muted basemap. The product's value comes from occupancy discovery, not duplicating a navigation app.
 
 **Limit:** All occupancy levels and walking-minute estimates displayed in this design remain fictional; map coordinates represent approximate real building locations.
+
+## 2026-10-29 — Restore semantic map traffic-light markers
+
+**Status:** Implemented, pending phone review.
+
+**Decision:** Keep the existing tinted status labels in the list and details untouched. On the map specifically, use readily recognizable green (#22c55e), yellow (#facc15), red (#ef4444), and grey (#9ca3af) pins. Use simple solid circles with a white edge and neutral dark selection ring, rather than bright teal/coral colours and a decorative centre dot.
+
+**Why:** Phone testing showed that teal and coral did not communicate the intended good / maybe / bad meanings at a glance. The map should favour intuitive occupancy semantics over novelty, without adding a cluttered legend.
+
+**Scope:** All displayed occupancy is still mock data. Marker colours are a UI convention, not live availability.
