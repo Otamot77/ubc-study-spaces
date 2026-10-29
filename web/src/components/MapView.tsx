@@ -30,7 +30,7 @@ export function MapView({ spaces, selected, selectedId, onSelect, onDetails }: P
             <strong className="map-selection-card__name">{selected.name}</strong>
             <span className="map-selection-card__meta">
               <BusynessIndicator busyness={selected.busyness} />
-              <span className="map-selection-card__demo">Sample data</span>
+              <span className="map-selection-card__demo">{selected.recentReportCount ? `${selected.recentReportCount} recent reports` : "No recent reports"}</span>
             </span>
           </span>
           <ChevronRight size={20} className="map-selection-card__chevron" aria-hidden="true" />

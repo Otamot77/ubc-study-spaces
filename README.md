@@ -4,37 +4,45 @@ A mobile-first study-space finder for students at UBC Vancouver.
 
 **Core question:** Where can I find a good study spot right now?
 
-## Vision
+The React frontend and Node.js/SQLite reporting API now form a **working local prototype**. Students can select a building, submit a one-tap crowding report, and see its status update in the list and map. Reports persist across API restarts and age out after 45 minutes. With no recent reports, the status is always **Unknown**.
 
-Open the app, see nearby study spaces, compare **recently reported** busyness and walking distance, and choose where to go. Students can contribute quick crowd reports. The interface should be simpler than a traditional campus directory.
+## Run it locally
 
-A lack of recent reports means **unknown**, never "empty."
+Requires Node.js **24.15+** (Node 26 works), npm, and two terminals.
 
-## Frontend prototype
+Terminal A:
 
-The first **React + TypeScript** UI prototype is now in [`web/`](web/). It has compact cards, demo sorting, a List / Map toggle, and a reporting interaction preview.
-
-```sh
-cd web
-npm install
+```powershell
+cd server
 npm run dev
 ```
 
-See [frontend instructions](web/README.md) for build and test commands.
+Terminal B:
 
-**Important:** All displayed walking times, crowding levels, report counts, and rankings are **fictional sample data**. The map is a placeholder; real location and reporting services are not connected. This is not yet a deployed PWA.
+```powershell
+cd web
+npm ci
+npm run dev -- --host 0.0.0.0
+```
 
-## Proposed MVP (subject to change)
+Open the printed frontend Network URL on a phone connected to the same Wi-Fi. Vite proxies API requests to the local backend.
 
-- Mobile-first list of curated study spaces
-- Optional location-based discovery, with manual fallback
-- Sorting by distance, reported busyness, or recommendations
-- One-tap reports: plenty of seats / some seats / almost full
-- Honest timestamps and handling of stale or conflicting reports
-- Persistent backend and automated tests
+## Tests
+
+```sh
+cd server && npm test
+cd ../web && npm run build && npm test
+```
+
+## Limits
+
+This remains a **local proof of concept**, not a public occupancy service or a deployed PWA. Building positions are approximate; crowdsourced occupancy is unverified. Walking-time estimates, personalization, production security/abuse prevention and hosted database are not implemented yet. Google Maps handles directions externally.
+
+See [frontend instructions](web/README.md), [API instructions](server/README.md), and [development roadmap](docs/ROADMAP.md).
 
 ## Documentation
 
 - [Product vision](docs/PRODUCT.md)
+- [Map data sources](docs/MAP_DATA.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Decision log](docs/DECISIONS.md)

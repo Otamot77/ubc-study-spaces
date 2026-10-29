@@ -117,3 +117,13 @@ Use this template:
 **Why:** Solid traffic-light dots felt unfinished, and marker positions appeared to drift away from buildings when zooming out. The custom `.study-pin { position: relative }` rule overrode Leaflet's required absolute marker positioning, a likely cause of the drift.
 
 **Verification:** Regression tests check marker glyphs and CSS positioning; real-device map zoom and pan still need human verification. All busyness values remain illustrative.
+
+## 2026-10-29 — Persistent reports, honest occupancy and local API
+
+**Status:** Implementation in progress, subject to automated tests and phone smoke test.
+
+**Decision:** Use a small Node.js 24.15+ API with its built-in SQLite database and prepared statements. Keep the API bound to local loopback; Vite proxies `/api` for same-Wi-Fi devices. Seed **no fictional occupancy reports**. Report submission is one tap after opening the Report sheet. The visible busyness is a simple 45-minute majority vote with ties Unknown, plus report count/freshness/confidence. Frontend polls periodically and refreshes after submission.
+
+**Why:** Persistence and honest stale/unknown states are the minimum useful full-stack milestone, without requiring a paid hosted database or sign-in.
+
+**Limitations:** Client IP rate limiting is lightweight and shared-IP users can collide behind a proxy. A public launch will require secure deployment, database backups, anti-abuse measures, and student validation. GPS and walking-time estimation are deferred; external Google Maps directions remain.
