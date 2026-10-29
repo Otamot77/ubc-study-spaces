@@ -1,5 +1,6 @@
 import { CheckCircle2, Info, LoaderCircle } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { ReportLocationPicker } from './ReportLocationPicker'
 import type { StudySpace } from '../types'
 
 interface Props {
@@ -20,6 +21,13 @@ export function ReportPreview({ spaces, selected, onSelect, onSuccess }: Props) 
   const [submitting, setSubmitting] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Switching locations should not carry an earlier failed selection or message.
+  useEffect(() => {
+    setChoice(null)
+    setSaved(false)
+    setError(null)
+  }, [selected.id])
 
   async function submit(level: (typeof options)[number]['id']) {
     if (submitting || saved) return
@@ -47,16 +55,12 @@ export function ReportPreview({ spaces, selected, onSelect, onSuccess }: Props) 
 
   return (
     <div className="report-sheet">
-      <label className="field-label" htmlFor="report-location">Study space</label>
-      <select
-        className="field-select"
-        id="report-location"
-        value={selected.id}
+      <ReportLocationPicker
+        spaces={spaces}
+        selected={selected}
         disabled={submitting || saved}
-        onChange={(event) => onSelect(event.target.value)}
-      >
-        {spaces.map((space) => <option key={space.id} value={space.id}>{space.name}</option>)}
-      </select>
+        onSelect={onSelect}
+      />
       <p className="field-label report-question">How busy is it right now?</p>
       <div className="report-options" role="group" aria-label="Submit a busyness report">
         {options.map((option) => (

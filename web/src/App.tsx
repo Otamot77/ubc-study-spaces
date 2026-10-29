@@ -222,7 +222,6 @@ export default function App() {
       {sheet === 'report' && selectedSpace && (
         <BottomSheet key="report" title="Report busyness" onClose={() => setSheet(null)}>
           <ReportPreview
-            key={selectedSpace.id}
             spaces={spaces}
             selected={selectedSpace}
             onSelect={setSelectedId}
