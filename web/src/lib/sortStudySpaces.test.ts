@@ -1,31 +1,36 @@
 import { describe, expect, it } from 'vitest'
-import { demoStudySpaces } from '../data/studySpaces'
 import { sortStudySpaces } from './sortStudySpaces'
+import type { StudySpace } from '../types'
+
+const base: Omit<StudySpace, 'id' | 'busyness' | 'walkingMinutes' | 'recommendedRank' | 'confidence'> = {
+  name: 'Study space',
+  coordinates: { lat: 49.26, lng: -123.25 },
+  recentReportCount: 0,
+  latestReportMinutesAgo: null,
+  directionsQuery: 'UBC Vancouver',
+}
+
+const spaces: StudySpace[] = [
+  { ...base, id: 'a', busyness: 'unknown', walkingMinutes: null, recommendedRank: 1, confidence: 'none' },
+  { ...base, id: 'b', busyness: 'high', walkingMinutes: 4, recommendedRank: 4, confidence: 'high' },
+  { ...base, id: 'c', busyness: 'low', walkingMinutes: 8, recommendedRank: 3, confidence: 'low' },
+  { ...base, id: 'd', busyness: 'low', walkingMinutes: 6, recommendedRank: 2, confidence: 'high' },
+]
 
 describe('sortStudySpaces', () => {
-  it('sorts by ascending walking time', () => {
-    const result = sortStudySpaces([...demoStudySpaces].reverse(), 'closest')
-    expect(result.map((s) => s.walkingMinutes)).toEqual(
-      [...result.map((s) => s.walkingMinutes)].sort((a, b) => a - b),
-    )
+  it('sorts known walking times first, unknown times last', () => {
+    expect(sortStudySpaces(spaces, 'closest').map((space) => space.id)).toEqual(['b', 'd', 'c', 'a'])
   })
-
   it('puts unknown busyness last and low busyness first', () => {
-    const result = sortStudySpaces(demoStudySpaces, 'least-busy')
-    expect(result[0].busyness).toBe('low')
-    expect(result[result.length - 1].busyness).toBe('unknown')
+    expect(sortStudySpaces(spaces, 'least-busy').map((space) => space.id)).toEqual(['d', 'c', 'b', 'a'])
   })
-
-  it('uses sample recommendation rankings', () => {
-    const result = sortStudySpaces(demoStudySpaces, 'recommended')
-    expect(result.map((s) => s.recommendedRank)).toEqual(
-      [...result.map((s) => s.recommendedRank)].sort((a, b) => a - b),
-    )
+  it('prefers confident lower occupancy in recommendations', () => {
+    expect(sortStudySpaces(spaces, 'recommended').map((space) => space.id)).toEqual(['d', 'c', 'b', 'a'])
   })
-
-  it('does not modify its input array', () => {
-    const original = [...demoStudySpaces]
-    sortStudySpaces(demoStudySpaces, 'least-busy')
-    expect(demoStudySpaces).toEqual(original)
+  it('preserves the input array and falls back to building order', () => {
+    const copy = [...spaces]
+    sortStudySpaces(spaces, 'recommended')
+    expect(spaces).toEqual(copy)
+    expect(sortStudySpaces([spaces[1], spaces[0]], 'closest').map((s) => s.id)).toEqual(['b', 'a'])
   })
 })

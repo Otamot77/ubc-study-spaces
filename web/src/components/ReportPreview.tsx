@@ -1,4 +1,4 @@
-import { CheckCircle2, Info } from 'lucide-react'
+import { CheckCircle2, Info, LoaderCircle } from 'lucide-react'
 import { useState } from 'react'
 import type { StudySpace } from '../types'
 
@@ -6,6 +6,7 @@ interface Props {
   spaces: readonly StudySpace[]
   selected: StudySpace
   onSelect: (id: string) => void
+  onSuccess: () => void
 }
 
 const options = [
@@ -14,38 +15,78 @@ const options = [
   { id: 'high', label: 'Almost full', detail: 'Very limited seating' },
 ] as const
 
-export function ReportPreview({ spaces, selected, onSelect }: Props) {
+export function ReportPreview({ spaces, selected, onSelect, onSuccess }: Props) {
   const [choice, setChoice] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function submit(level: (typeof options)[number]['id']) {
+    if (submitting || saved) return
+    setChoice(level)
+    setSubmitting(true)
+    setError(null)
+    try {
+      const response = await fetch(`/api/spaces/${encodeURIComponent(selected.id)}/reports`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ level }),
+      })
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null) as { error?: string } | null
+        throw new Error(payload?.error || `Report failed (${response.status})`)
+      }
+      setSaved(true)
+      onSuccess()
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not submit report.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <div className="report-sheet">
       <label className="field-label" htmlFor="report-location">Study space</label>
-      <select className="field-select" id="report-location" value={selected.id} onChange={(event) => onSelect(event.target.value)}>
+      <select
+        className="field-select"
+        id="report-location"
+        value={selected.id}
+        disabled={submitting || saved}
+        onChange={(event) => onSelect(event.target.value)}
+      >
         {spaces.map((space) => <option key={space.id} value={space.id}>{space.name}</option>)}
       </select>
       <p className="field-label report-question">How busy is it right now?</p>
-      <div className="report-options" role="group" aria-label="Example busyness report">
+      <div className="report-options" role="group" aria-label="Submit a busyness report">
         {options.map((option) => (
           <button
             key={option.id}
             type="button"
             className={'report-choice' + (choice === option.id ? ' report-choice--active' : '')}
             aria-pressed={choice === option.id}
-            onClick={() => setChoice(option.id)}
+            disabled={submitting || saved}
+            onClick={() => { void submit(option.id) }}
           >
             <span>
               <strong>{option.label}</strong>
               <small>{option.detail}</small>
             </span>
-            {choice === option.id ? <CheckCircle2 size={21} aria-hidden="true" /> : <span className="report-choice__circle" aria-hidden="true" />}
+            {submitting && choice === option.id
+              ? <LoaderCircle className="loading-spin" size={21} aria-hidden="true" />
+              : choice === option.id
+                ? <CheckCircle2 size={21} aria-hidden="true" />
+                : <span className="report-choice__circle" aria-hidden="true" />}
           </button>
         ))}
       </div>
-      <p className="report-disclaimer">
+      <p className={'report-disclaimer' + (error ? ' report-disclaimer--error' : '')} role="status" aria-live="polite">
         <Info size={16} aria-hidden="true" />
-        {choice
-          ? 'Preview selection saved on this screen only. No report was submitted.'
-          : 'This is an interface preview. Reports are not sent or stored yet.'}
+        {saved
+          ? 'Report saved! Thank you. Your submission now contributes to recent occupancy.'
+          : error || (submitting
+            ? 'Submitting your report…'
+            : 'Tap one option to submit a real anonymous report. Only report what you see in person.')}
       </p>
     </div>
   )

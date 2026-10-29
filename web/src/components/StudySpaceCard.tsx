@@ -1,4 +1,4 @@
-import { ChevronRight, Footprints } from 'lucide-react'
+import { ChevronRight, Footprints, MapPin } from 'lucide-react'
 import type { StudySpace } from '../types'
 import { BusynessIndicator } from './BusynessIndicator'
 
@@ -10,8 +10,8 @@ interface Props {
 
 export function StudySpaceCard({ space, selected, onSelect }: Props) {
   const reportMeta = space.recentReportCount === 0
-    ? 'No recent sample reports'
-    : `${space.recentReportCount} sample reports · Latest ${space.latestReportMinutesAgo} min ago`
+    ? 'No recent reports · Status unknown'
+    : `${space.recentReportCount} recent ${space.recentReportCount === 1 ? 'report' : 'reports'} · Latest ${space.latestReportMinutesAgo} min ago · ${space.confidence} confidence`
 
   return (
     <article className={'space-card' + (selected ? ' space-card--selected' : '')}>
@@ -27,8 +27,9 @@ export function StudySpaceCard({ space, selected, onSelect }: Props) {
         </div>
         <div className="space-card__summary">
           <span className="walking-time">
-            <Footprints size={16} strokeWidth={1.8} aria-hidden="true" />
-            {space.walkingMinutes} min walk
+            {space.walkingMinutes === null
+              ? <><MapPin size={16} strokeWidth={1.8} aria-hidden="true" /> UBC campus</>
+              : <><Footprints size={16} strokeWidth={1.8} aria-hidden="true" /> {space.walkingMinutes} min walk</>}
           </span>
           <BusynessIndicator busyness={space.busyness} />
         </div>

@@ -6,23 +6,26 @@ const busynessOrder: Record<Busyness, number> = {
   high: 2,
   unknown: 3,
 }
+const confidencePenalty = { high: 0, medium: 1, low: 2, none: 3 } as const
 
 export function sortStudySpaces(spaces: readonly StudySpace[], mode: SortMode): StudySpace[] {
-  // Never mutate caller-owned data. Unknown busyness sorts last in least-busy mode.
   return [...spaces].sort((a, b) => {
+    // Ready for geolocation: unknown walk times always come last.
     if (mode === 'closest') {
-      return a.walkingMinutes - b.walkingMinutes || a.name.localeCompare(b.name)
+      return (a.walkingMinutes ?? Infinity) - (b.walkingMinutes ?? Infinity) ||
+        a.recommendedRank - b.recommendedRank
     }
 
     if (mode === 'least-busy') {
-      return (
-        busynessOrder[a.busyness] - busynessOrder[b.busyness] ||
-        a.walkingMinutes - b.walkingMinutes
-      )
+      return busynessOrder[a.busyness] - busynessOrder[b.busyness] ||
+        a.recommendedRank - b.recommendedRank
     }
 
-    // Demo-only recommendation order. A real ranking algorithm is not implemented.
-    return a.recommendedRank - b.recommendedRank
+    // Transparent baseline: estimated availability, then reliability,
+    // then the established building order. Unknown is always last.
+    return busynessOrder[a.busyness] - busynessOrder[b.busyness] ||
+      confidencePenalty[a.confidence] - confidencePenalty[b.confidence] ||
+      a.recommendedRank - b.recommendedRank
   })
 }
 

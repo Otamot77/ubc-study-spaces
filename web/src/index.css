@@ -296,3 +296,15 @@ button:focus-visible, a:focus-visible, select:focus-visible {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
 
+
+
+/* Reporting API states; never silently show made-up occupancy when offline. */
+.api-state { padding: 16px; color: #687686; background: #fff; border: 1px solid #e3e7eb; border-radius: 13px; font-size: 13px; }
+.api-state--error { display: grid; gap: 12px; color: #8d3d48; background: #fff6f6; }
+.map-unavailable { display: grid; place-items: center; height: 100%; padding: 20px; color: #788593; font-size: 13px; text-align: center; }
+.sort-button:disabled { cursor: not-allowed; color: #a4aab3; background: #f4f5f7; border-color: #eceef1; }
+.nav-button:disabled { opacity: .45; cursor: not-allowed; }
+.report-choice:disabled { cursor: default; }
+.report-disclaimer--error { color: #b83548; }
+.loading-spin { animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
