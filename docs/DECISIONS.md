@@ -77,3 +77,13 @@ Use this template:
 **Why:** ...
 
 **Follow-up:** ...
+
+## 2026-10-28 — Simplify map mode after phone feedback
+
+**Status:** Implemented; pending device review.
+
+**Decision:** Hide Recommended / Least busy / Closest in Map mode; they order the list, not geographic markers. All locations remain visible on the map. Start with a campus overview and no selected place unless the user has already picked one. Tap a coloured pin to show a compact ~74px card; tap the card for the existing details bottom sheet. Animate the map centre into the unobstructed area above that card. Keep an intentionally low-contrast, desaturated OpenStreetMap background and visible attribution.
+
+**Why:** The first map obscured too much of the viewport, recentered inadequately, and contained more basemap labels and controls than useful for choosing a study space.
+
+**Constraint:** No CARTO key is configured, so this does not switch to a provider that would display an API-key watermark. Sample crowding and travel times remain explicitly illustrative.

@@ -74,22 +74,24 @@ export default function App() {
             </button>
           </div>
         </div>
-        <div className="sort-buttons" role="group" aria-label="Sort study spaces">
-          {sortOptions.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              className={'sort-button' + (sort === option.id ? ' sort-button--active' : '')}
-              aria-pressed={sort === option.id}
-              onClick={() => {
-                setSort(option.id)
-                listRef.current?.scrollTo({ top: 0, behavior: 'auto' })
-              }}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+        {view === 'list' && (
+          <div className="sort-buttons" role="group" aria-label="Sort study spaces">
+            {sortOptions.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className={'sort-button' + (sort === option.id ? ' sort-button--active' : '')}
+                aria-pressed={sort === option.id}
+                onClick={() => {
+                  setSort(option.id)
+                  listRef.current?.scrollTo({ top: 0, behavior: 'auto' })
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        )}
       </section>
 
       <main className="content-viewport">
@@ -118,8 +120,8 @@ export default function App() {
           <div className="map-region">
             <MapView
               spaces={demoStudySpaces}
-              selected={selectedSpace}
-              selectedId={selectedSpace.id}
+              selected={selectedId ? selectedSpace : null}
+              selectedId={selectedId}
               onSelect={setSelectedId}
               onDetails={() => showDetails(selectedSpace)}
             />

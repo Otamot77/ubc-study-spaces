@@ -24,12 +24,12 @@ npm run preview
 
 ## Current interaction design
 
-- Fixed compact header, List / Map toggle, and sorting controls
+- Fixed compact header and List / Map toggle; sorting controls appear only in List mode
 - **Only the list scrolls**; bottom Explore / Report navigation stays pinned
 - Compact tappable cards launch a details bottom sheet
 - Details sheet provides external Google Maps directions and a reporting preview
 - Report tab launches a three-choice reporting sheet with a location selector
-- Map view displays a real interactive Leaflet/OpenStreetMap campus map with eight building pins, marker selection, pan and zoom
+- Map mode shows all eight building pins on a visually simplified OpenStreetMap basemap; selecting a marker recentres it above a small detail preview
 
 The details and report sheets support Escape to close, backdrop dismissal, and keyboard focus cycling. Animations are disabled when reduced motion is preferred.
 
@@ -37,7 +37,7 @@ The details and report sheets support Escape to close, backdrop dismissal, and k
 
 Building marker coordinates are approximate published **real locations** (see [map data sources](../docs/MAP_DATA.md)). All crowd reports, walking times, and recommendation rankings are **fictional**. Individual study zones, access and entrances have not been verified.
 
-The map uses the community-hosted OpenStreetMap tile server for modest development, not guaranteed production use. It requires internet and has usage restrictions; use a suitable provider before public launch. Override its URL with `VITE_MAP_TILE_URL` when appropriate. There is no real GPS, pedestrian routing API, report persistence, login, backend, notification system, or PWA service worker yet. Report selections are on-screen previews only. This is not an occupancy service.
+The prototype visually mutes standard OpenStreetMap tiles to reduce label clutter without a proprietary map API key. The map uses the community-hosted OpenStreetMap tile server for modest development, not guaranteed production use. It requires internet and has usage restrictions; use a suitable provider before public launch. Override its URL with `VITE_MAP_TILE_URL` when appropriate. There is no real GPS, pedestrian routing API, report persistence, login, backend, notification system, or PWA service worker yet. Report selections are on-screen previews only. This is not an occupancy service.
 
 The sample dataset lives in `src/data/studySpaces.ts`. Sorting is implemented in `src/lib/sortStudySpaces.ts`.
 
