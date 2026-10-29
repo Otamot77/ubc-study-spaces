@@ -119,12 +119,12 @@ export default function App() {
             <MapView
               spaces={demoStudySpaces}
               selected={selectedSpace}
-              selectedId={selectedId}
+              selectedId={selectedSpace.id}
               onSelect={setSelectedId}
               onDetails={() => showDetails(selectedSpace)}
             />
           </div>
-        )
+        )}
       </main>
 
       <nav className="bottom-nav" aria-label="Primary navigation">
