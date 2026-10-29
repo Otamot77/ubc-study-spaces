@@ -180,17 +180,24 @@ button:focus-visible, a:focus-visible, select:focus-visible {
 }
 .map-preview .leaflet-control-zoom a { color: #334353; border-bottom-color: #e3e7eb; }
 .study-pin {
-  position: relative; border: 3px solid #fff; border-radius: 50%;
-  background: #9ca3af; box-shadow: 0 2px 9px #0f192e45;
-  cursor: pointer; transition: box-shadow .16s ease, border-color .16s ease;
+  /* Leaflet sets translated pixel coordinates on absolute-positioned icons.
+     Relative positioning overrides Leaflet's CSS and makes pins drift at different zooms. */
+  position: absolute;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid #fff; border-radius: 50%;
+  box-shadow: 0 2px 10px #1e293b30;
+  cursor: pointer; color: #64748b;
+  transition: box-shadow .16s ease, border-color .16s ease;
 }
-.study-pin--low { background: #22c55e; }
-.study-pin--moderate { background: #facc15; }
-.study-pin--high { background: #ef4444; }
-.study-pin--unknown { background: #9ca3af; }
+.study-pin__glyph { display: block; width: 22px; height: 22px; pointer-events: none; }
+/* Two-tone symbols match the CircleCheck / CircleDot / CircleAlert / CircleHelp list icons. */
+.study-pin--low { background: #e1f7e8; color: #13854a; }
+.study-pin--moderate { background: #fff3cc; color: #a87405; }
+.study-pin--high { background: #ffe4e8; color: #c6334a; }
+.study-pin--unknown { background: #edf0f4; color: #667384; }
 .study-pin--selected {
   border-color: #fff;
-  box-shadow: 0 0 0 3px #293545, 0 3px 12px #14203355;
+  box-shadow: 0 0 0 3px #35475c, 0 4px 14px #1420333d;
 }
 .map-selection-card {
   position: absolute; z-index: 1100;

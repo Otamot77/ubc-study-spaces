@@ -107,3 +107,13 @@ Use this template:
 **Why:** Phone testing showed that teal and coral did not communicate the intended good / maybe / bad meanings at a glance. The map should favour intuitive occupancy semantics over novelty, without adding a cluttered legend.
 
 **Scope:** All displayed occupancy is still mock data. Marker colours are a UI convention, not live availability.
+
+## 2026-10-29 — Two-tone marker glyphs and Leaflet anchor fix
+
+**Status:** Implemented, pending phone zoom/pan verification.
+
+**Decision:** Replace solid map dots with pale-tinted circles containing the same four status glyphs used in List view (check, dot, alert, and help). Keep the list styling unchanged. Explicitly restore `position: absolute` for the Leaflet marker DOM nodes; do not use `position: relative` on them. Preserve centered `iconAnchor` and keep the selected marker above others.
+
+**Why:** Solid traffic-light dots felt unfinished, and marker positions appeared to drift away from buildings when zooming out. The custom `.study-pin { position: relative }` rule overrode Leaflet's required absolute marker positioning, a likely cause of the drift.
+
+**Verification:** Regression tests check marker glyphs and CSS positioning; real-device map zoom and pan still need human verification. All busyness values remain illustrative.

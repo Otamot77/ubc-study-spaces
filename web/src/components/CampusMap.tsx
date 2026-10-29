@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import * as L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { Busyness, StudySpace } from '../types'
+import { MAP_MARKER_ANCHOR, MAP_MARKER_SIZE, mapMarkerSvg } from '../lib/mapMarkerIcons'
 
 interface Props {
   spaces: readonly StudySpace[]
@@ -15,11 +16,10 @@ const TILE_URL = import.meta.env.VITE_MAP_TILE_URL || 'https://tile.openstreetma
 
 function markerIcon(busyness: Busyness, selected: boolean): L.DivIcon {
   return L.divIcon({
-    // No user-controlled HTML is inserted into the marker.
     className: `study-pin study-pin--${busyness}${selected ? ' study-pin--selected' : ''}`,
-    // A plain solid dot reads more like a map marker than a decorative badge.
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
+    html: mapMarkerSvg(busyness),
+    iconSize: [MAP_MARKER_SIZE, MAP_MARKER_SIZE],
+    iconAnchor: [MAP_MARKER_ANCHOR, MAP_MARKER_ANCHOR],
   })
 }
 
@@ -66,6 +66,7 @@ export function CampusMap({ spaces, selectedId, onSelect }: Props) {
     spaces.forEach((space) => {
       const marker = L.marker([space.coordinates.lat, space.coordinates.lng], {
         icon: markerIcon(space.busyness, space.id === selectedId),
+        zIndexOffset: space.id === selectedId ? 1000 : 0,
         title: space.name,
         alt: space.name,
         keyboard: true,
@@ -98,9 +99,11 @@ export function CampusMap({ spaces, selectedId, onSelect }: Props) {
     if (!map) return
 
     spaces.forEach((space) => {
-      markersRef.current.get(space.id)?.setIcon(
-        markerIcon(space.busyness, space.id === selectedId),
-      )
+      const marker = markersRef.current.get(space.id)
+      if (marker) {
+        marker.setIcon(markerIcon(space.busyness, space.id === selectedId))
+        marker.setZIndexOffset(space.id === selectedId ? 1000 : 0)
+      }
     })
 
     if (selectedId) {
