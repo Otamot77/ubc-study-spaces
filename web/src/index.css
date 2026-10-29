@@ -257,3 +257,41 @@ button:focus-visible, a:focus-visible, select:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* Real interactive Leaflet map (independent of the List scroller). */
+.map-preview { background: #e8eee9; background-image: none; }
+.campus-map { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; }
+.campus-map.leaflet-container { font-family: inherit; background: #e8eee9; }
+.map-preview__card { z-index: 1100; }
+.map-preview .leaflet-control-attribution {
+  border-radius: 7px; padding: 3px 6px; font-size: 10px;
+  background: rgba(255,255,255,.94); box-shadow: 0 1px 5px #1d2b3630;
+}
+.map-preview .leaflet-control-attribution a { color: #39668e; }
+.map-preview .leaflet-control-zoom {
+  overflow: hidden; border: 1px solid #e1e6eb; border-radius: 10px;
+  box-shadow: 0 2px 8px #24303a1a;
+}
+.map-preview .leaflet-control-zoom a { color: #334353; border-bottom-color: #e3e7eb; }
+.study-pin {
+  position: relative; border: 4px solid white; border-radius: 50%;
+  background: #848e99; box-shadow: 0 2px 9px #0f192e5c;
+  cursor: pointer; transition: box-shadow .16s ease, border-color .16s ease;
+}
+.study-pin--low { background: #268256; }
+.study-pin--moderate { background: #b57e26; }
+.study-pin--high { background: #ba5555; }
+.study-pin--unknown { background: #8e99a5; }
+.study-pin--selected {
+  border-color: #e2f0ff;
+  box-shadow: 0 0 0 4px #2a557899, 0 3px 12px #14203355;
+}
+.study-pin__centre {
+  position: absolute; width: 9px; height: 9px;
+  border-radius: 50%; background: white; top: 9px; left: 9px;
+}
+@media (max-width: 520px) {
+  .map-preview__card { padding: 13px; }
+  .map-preview__summary { margin: 11px 0; }
+  .map-preview__actions { gap: 7px; }
+}

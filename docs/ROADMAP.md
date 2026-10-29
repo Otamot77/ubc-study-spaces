@@ -18,7 +18,8 @@ This is a working plan, not a fixed commitment. Each milestone should produce a 
 - [ ] Curate and verify a small UBC study-zone dataset
 - [ ] Ask for location permission only when useful; manual fallback
 - [ ] Distance sorting using real position (mock sorting exists)
-- [ ] Interactive map and actual walking-time estimates
+- [x] Real interactive map with sourced building-level pins and selection sync
+- [ ] Real walking-time estimates from a pedestrian routing service
 - [ ] External directions (prototype links exist)
 
 ## 3. Working reporting backend

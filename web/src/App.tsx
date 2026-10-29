@@ -2,7 +2,7 @@ import { Compass, Footprints, Info, List, Map as MapIcon, MapPin, MessageCircleP
 import { useMemo, useRef, useState } from 'react'
 import { BottomSheet } from './components/BottomSheet'
 import { BusynessIndicator } from './components/BusynessIndicator'
-import { MapPlaceholder } from './components/MapPlaceholder'
+import { MapView } from './components/MapView'
 import { ReportPreview } from './components/ReportPreview'
 import { StudySpaceCard } from './components/StudySpaceCard'
 import { demoStudySpaces } from './data/studySpaces'
@@ -114,14 +114,17 @@ export default function App() {
           </section>
           <p className="list-end">You've seen all {spaces.length} sample spaces.</p>
         </div>
-        <div className="map-region" hidden={view !== 'map'}>
-          <MapPlaceholder
-            spaces={spaces}
-            selected={selectedSpace}
-            onSelect={setSelectedId}
-            onDetails={() => showDetails(selectedSpace)}
-          />
-        </div>
+        {view === 'map' && (
+          <div className="map-region">
+            <MapView
+              spaces={demoStudySpaces}
+              selected={selectedSpace}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              onDetails={() => showDetails(selectedSpace)}
+            />
+          </div>
+        )
       </main>
 
       <nav className="bottom-nav" aria-label="Primary navigation">

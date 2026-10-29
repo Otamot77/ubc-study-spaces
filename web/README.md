@@ -29,18 +29,18 @@ npm run preview
 - Compact tappable cards launch a details bottom sheet
 - Details sheet provides external Google Maps directions and a reporting preview
 - Report tab launches a three-choice reporting sheet with a location selector
-- Map view fills the available space but remains a placeholder
+- Map view displays a real interactive Leaflet/OpenStreetMap campus map with eight building pins, marker selection, pan and zoom
 
 The details and report sheets support Escape to close, backdrop dismissal, and keyboard focus cycling. Animations are disabled when reduced motion is preferred.
 
 ## Data and feature limits
 
-All displayed crowd reports, walking times, and recommendation rankings are **fictional**. The additional entries are for scrolling and UI testing only; individual study zones and access have not been verified.
+Building marker coordinates are approximate published **real locations** (see [map data sources](../docs/MAP_DATA.md)). All crowd reports, walking times, and recommendation rankings are **fictional**. Individual study zones, access and entrances have not been verified.
 
-There is no real GPS, map, routing API, report persistence, login, backend, notification system, or PWA service worker yet. Report selections are on-screen previews only. This is not an occupancy service.
+The map uses the community-hosted OpenStreetMap tile server for modest development, not guaranteed production use. It requires internet and has usage restrictions; use a suitable provider before public launch. Override its URL with `VITE_MAP_TILE_URL` when appropriate. There is no real GPS, pedestrian routing API, report persistence, login, backend, notification system, or PWA service worker yet. Report selections are on-screen previews only. This is not an occupancy service.
 
 The sample dataset lives in `src/data/studySpaces.ts`. Sorting is implemented in `src/lib/sortStudySpaces.ts`.
 
 ## Next step
 
-Test the mobile UI on a real device before introducing genuine map and occupancy services.
+Test all map markers on a real phone, including List / Map selection sync. Next: optional browser location, real pedestrian routing, and genuine occupancy services.
