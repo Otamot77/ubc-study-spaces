@@ -1,15 +1,29 @@
 import { createServer } from 'node:http'
+import { createHash, timingSafeEqual } from 'node:crypto'
+import { serveStatic } from './static.js'
 import { addReport, correctReport, occupancy, WINDOW_MS, CORRECTION_MS } from './db.js'
 import { spaceIds, spaces } from './spaces.js'
 
 const VALID_LEVELS = new Set(['low', 'moderate', 'high'])
 const MAX_BODY_BYTES = 2048
 
+/** Shared beta invite code, intentionally not a substitute for user accounts. */
+export function createBetaAccessVerifier(betaCode) {
+  if (!betaCode) return () => true
+  const expected = createHash('sha256').update(betaCode, 'utf8').digest()
+  return (submitted) => {
+    if (typeof submitted !== 'string' || submitted.length > 256) return false
+    const actual = createHash('sha256').update(submitted, 'utf8').digest()
+    return timingSafeEqual(expected, actual)
+  }
+}
+
 function json(res, status, data, extraHeaders = {}) {
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
     'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
     ...extraHeaders,
   })
   res.end(JSON.stringify(data))
@@ -66,12 +80,20 @@ export function createRateLimiter() {
   }
 }
 
-export function makeServer({ db, clock = () => Date.now(), limiter = createRateLimiter() }) {
+export function makeServer({
+  db, clock = () => Date.now(), limiter = createRateLimiter(),
+  betaCode = process.env.BETA_REPORT_CODE || null,
+  staticDir = process.env.STATIC_DIR || null,
+}) {
+  const verifyAccess = createBetaAccessVerifier(betaCode)
   return createServer(async (req, res) => {
     const pathname = new URL(req.url || '/', 'http://localhost').pathname
     try {
       if (req.method === 'GET' && pathname === '/api/health') {
         return json(res, 200, { ok: true })
+      }
+      if (req.method === 'GET' && pathname === '/api/config') {
+        return json(res, 200, { betaAccessRequired: Boolean(betaCode) })
       }
       if (req.method === 'GET' && pathname === '/api/spaces') {
         const now = clock()
@@ -87,6 +109,9 @@ export function makeServer({ db, clock = () => Date.now(), limiter = createRateL
       }
       const reportMatch = /^\/api\/spaces\/([a-z0-9-]+)\/reports$/.exec(pathname)
       if (req.method === 'POST' && reportMatch) {
+        if (!verifyAccess(req.headers['x-study-spaces-access'])) {
+          return json(res, 403, { error: 'Beta access code required or incorrect.' })
+        }
         const spaceId = reportMatch[1]
         if (!spaceIds.has(spaceId)) return json(res, 404, { error: 'Unknown study space' })
         const body = await readJson(req)
@@ -108,6 +133,9 @@ export function makeServer({ db, clock = () => Date.now(), limiter = createRateL
       }
       const correctionMatch = /^\/api\/spaces\/([a-z0-9-]+)\/reports\/([1-9][0-9]*)$/.exec(pathname)
       if (req.method === 'PATCH' && correctionMatch) {
+        if (!verifyAccess(req.headers['x-study-spaces-access'])) {
+          return json(res, 403, { error: 'Beta access code required or incorrect.' })
+        }
         const [, spaceId, reportIdText] = correctionMatch
         const reportId = Number(reportIdText)
         if (!spaceIds.has(spaceId) || !Number.isSafeInteger(reportId)) {
@@ -127,6 +155,9 @@ export function makeServer({ db, clock = () => Date.now(), limiter = createRateL
           saved: body.level !== null, corrected: true, revoked: body.level === null,
           spaceId, reportId, ...occupancy(db, spaceId, now),
         })
+      }
+      if (staticDir && req.method === 'GET' && !pathname.startsWith('/api/')) {
+        if (await serveStatic(req, res, staticDir)) return
       }
       if (!['GET', 'POST', 'PATCH'].includes(req.method)) return json(res, 405, { error: 'Method not allowed' }, { Allow: 'GET, POST, PATCH' })
       return json(res, 404, { error: 'Not found' })

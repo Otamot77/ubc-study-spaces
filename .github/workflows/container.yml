@@ -1,0 +1,59 @@
+name: Release container checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+      - "web/**"
+      - "server/**"
+      - ".github/workflows/container.yml"
+  pull_request:
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+      - "web/**"
+      - "server/**"
+      - ".github/workflows/container.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  docker-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build deployable frontend + API image
+        run: docker build -t study-spaces-beta:ci .
+      - name: Start server with SQLite volume and beta access requirement
+        run: |
+          mkdir -p db-test
+          docker run -d --rm --name study-spaces-ci \
+            -e BETA_REPORT_CODE=test-beta-access-code \
+            -e STUDY_SPACES_DB_PATH=/data/study-spaces.sqlite \
+            -v "${{ github.workspace }}/db-test:/data" \
+            -p 127.0.0.1:8787:8787 study-spaces-beta:ci
+          for i in {1..30}; do
+            curl --silent --fail http://127.0.0.1:8787/api/health && break
+            sleep 1
+          done
+      - name: Verify HTML and protected reporting
+        run: |
+          curl --fail --silent http://127.0.0.1:8787/ | grep -q '<html'
+          curl --fail --silent http://127.0.0.1:8787/api/config | grep -q '"betaAccessRequired":true'
+          test "$(curl -s -o /dev/null -w '%{http_code}' \
+            -X POST -H 'Content-Type: application/json' -d '{"level":"low"}' \
+            http://127.0.0.1:8787/api/spaces/koerner/reports)" = "403"
+          test "$(curl -s -o /dev/null -w '%{http_code}' \
+            -X POST -H 'Content-Type: application/json' \
+            -H 'X-Study-Spaces-Access: test-beta-access-code' \
+            -d '{"level":"low"}' \
+            http://127.0.0.1:8787/api/spaces/koerner/reports)" = "201"
+      - name: Inspect logs on failure
+        if: failure()
+        run: docker logs study-spaces-ci || true
+      - name: Stop container
+        if: always()
+        run: docker stop study-spaces-ci || true

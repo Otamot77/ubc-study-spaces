@@ -1,0 +1,13 @@
+**/node_modules
+**/dist
+**/.vite
+**/coverage
+server/data
+.git
+.github
+.env
+.env.*
+**/*.sqlite
+**/*.sqlite-shm
+**/*.sqlite-wal
+*.log
