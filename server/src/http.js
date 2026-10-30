@@ -6,6 +6,7 @@ import { spaceIds, spaces } from './spaces.js'
 
 const VALID_LEVELS = new Set(['low', 'moderate', 'high'])
 const MAX_BODY_BYTES = 2048
+const REPORTER_ID_PATTERN = /^[a-f0-9]{32}$/
 
 /** Shared beta invite code, intentionally not a substitute for user accounts. */
 export function createBetaAccessVerifier(betaCode) {
@@ -55,25 +56,42 @@ async function readJson(req) {
 }
 
 /**
- * Simple in-memory IP cooldown: local prototype only.
- * Deliberately ignores spoofable X-Forwarded-For and never writes IPs to SQLite.
+ * Local prototype rate limiter. Keep a network-wide cap to deter trivial
+ * reporter-ID rotation, but apply the short same-building cooldown to each
+ * anonymous browser session. Vite proxies LAN phones through one IP.
+ *
+ * Reporter IDs are untrusted and spoofable: this is NOT production identity.
+ * Neither reporter IDs nor IPs are written to SQLite.
  */
 export function createRateLimiter() {
   const byIp = new Map()
-  return function allow(ip, spaceId, now) {
-    const active = (byIp.get(ip) || []).filter((entry) => now - entry.at < 3_600_000)
-    // Shared campus NATs can collide: this is a prototype restriction, not
-    // a secure identity or production-level spam prevention system.
-    const lastSameSpace = active.findLast((entry) => entry.spaceId === spaceId)
-    if (active.length >= 20 || (lastSameSpace && now - lastSameSpace.at < 30_000)) {
-      byIp.set(ip, active)
-      return false
+  const byReporter = new Map()
+
+  return function allow(ip, spaceId, now, reporterId) {
+    const networkEvents = (byIp.get(ip) || []).filter((entry) => now - entry < 3_600_000)
+    // Protect the shared local API from high volume even if IDs are spoofed.
+    if (networkEvents.length >= 60) return false
+
+    const validId = typeof reporterId === 'string' && REPORTER_ID_PATTERN.test(reporterId)
+    const key = ip + ':' + (validId ? reporterId : 'legacy')
+    const events = (byReporter.get(key) || []).filter((entry) => now - entry.at < 3_600_000)
+    const lastSameSpace = events.findLast((entry) => entry.spaceId === spaceId)
+    if (events.length >= 20 || (lastSameSpace && now - lastSameSpace.at < 30_000)) return false
+
+    events.push({ spaceId, at: now })
+    byReporter.set(key, events)
+    networkEvents.push(now)
+    byIp.set(ip, networkEvents)
+
+    // Bound the in-memory maps after many unique reporters, pruning expired keys.
+    if (byReporter.size > 2000) {
+      for (const [k, entries] of byReporter) {
+        if (entries.every((entry) => now - entry.at >= 3_600_000)) byReporter.delete(k)
+      }
     }
-    active.push({ spaceId, at: now })
-    byIp.set(ip, active)
-    if (byIp.size > 5000) {
-      for (const [key, entries] of byIp) {
-        if (entries.every((entry) => now - entry.at >= 3_600_000)) byIp.delete(key)
+    if (byIp.size > 2000) {
+      for (const [k, entries] of byIp) {
+        if (entries.every((at) => now - at >= 3_600_000)) byIp.delete(k)
       }
     }
     return true
@@ -121,7 +139,7 @@ export function makeServer({
         }
         const now = clock()
         const ip = req.socket.remoteAddress || 'unknown'
-        if (!limiter(ip, spaceId, now)) {
+        if (!limiter(ip, spaceId, now, req.headers['x-study-spaces-reporter'])) {
           return json(res, 429, { error: 'Too many reports. Try again shortly.' }, { 'Retry-After': '30' })
         }
         const { reportId, editToken } = addReport(db, spaceId, body.level, now)

@@ -25,3 +25,6 @@ jobs:
       - name: Run SQLite and HTTP integration tests
         working-directory: server
         run: npm test
+      - name: Run simulated two-phone local smoke test
+        working-directory: server
+        run: npm run test:devices

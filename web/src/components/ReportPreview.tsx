@@ -1,6 +1,7 @@
 import { CheckCircle2, Info, LoaderCircle } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { ReportLocationPicker } from './ReportLocationPicker'
+import { anonymousReporterId } from '../lib/reporterId'
 import { buildReportRequest, correctionAllowed, nextReportLevel } from '../lib/reportFlow'
 import type { ReportLevel, SavedReport } from '../lib/reportFlow'
 import type { StudySpace } from '../types'
@@ -58,10 +59,12 @@ export function ReportPreview({
     setError(null)
     try {
       const request = buildReportRequest(selected.id, nextLevel, savedReport)
+      const reporterId = anonymousReporterId()
       const response = await fetch(request.url, {
         method: request.method,
         headers: {
           'Content-Type': 'application/json',
+          ...(reporterId ? { 'X-Study-Spaces-Reporter': reporterId } : {}),
           ...(requiresBetaCode ? { 'X-Study-Spaces-Access': betaAccessCode } : {}),
         },
         body: request.body,
