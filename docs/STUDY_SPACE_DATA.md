@@ -20,9 +20,9 @@
 | `nest` | AMS Nest | Informal | [AMS building](https://www.ams.ubc.ca/your-building/), [study rooms](https://www.ams.ubc.ca/your-building/study-rooms/) | Social space, some dedicated rooms separately booked |
 | `woodward` | Woodward Library | Library | [UBC branch map](https://wiki.prod.apps.ctlt.ubc.ca/Library), [hours](https://hours.library.ubc.ca/) | Confirmed branch library |
 | `life` | Life Building | Informal | [UBC Student Services](https://students.ubc.ca/about-student-services/ubc-life-building/) | UBC explicitly lists studying as a building use; individual study zones not checked |
-| `icics` | ICICS / CS Building | Building | [ICICS building location](https://icics.ubc.ca/facilities/shared-facilities/locating-the-icicscs-usability-labs/) | **Study zone not independently confirmed**, preserve original entry pending in-person check |
+| `icics` | ICICS / CS Study Areas | Informal study zones | [UBC Computer Science drop-in study areas](https://www.cs.ubc.ca/students/undergrad/services/informal-learning-spaces), [UBC CS facility access](https://www.cs.ubc.ca/students/undergrad/services/getting-started-guide) | **Documented drop-in spaces:** first- and second-floor atrium, study stairs and Demco Learning Centre (X150). Some labs and project rooms have booking/access restrictions; no blanket after-hours guarantee |
 | `lam` | David Lam Library | Library | [David Lam Library about](https://lam.library.ubc.ca/about-us/) | Individual and collaborative study in Canaccord Learning Commons |
-| `education` | Education Learning Commons | Learning commons | [UBC Education Learning Commons](https://education.library.ubc.ca/), [UBC Faculty of Education](https://educ.ubc.ca/neville-scarfe-office-block-temporary-relocations-may-2025-august-2025/) | Renamed. **2025–26** space was open for studying; verify access for 2026–27 |
+| `education` | Education Learning Commons | Learning commons | [UBC Education Learning Commons](https://education.library.ubc.ca/blog/), [UBC Vancouver Academic Calendar](https://vancouver.calendar.ubc.ca/) | Confirmed open study-space designation in published UBC sources; **2025–26** is the last explicitly guaranteed access period. Verify operational access/hours for 2026–27 |
 | `law` | Law Library | Library | [UBC Law Library](https://law.library.ubc.ca/about/), [UBC Library hours](https://hours.library.ubc.ca/) | Confirmed library; exam-time tables may be reserved for law students |
 | `asian` | Asian Library | Library | [UBC Asian Library history](https://asian.library.ubc.ca/history-and-development/), [hours](https://hours.library.ubc.ca/) | Ground floor reorganized as a study space in 2024 |
 | `xwi7xwa` | X̱wi7x̱wa Library | Library | [UBC Library — About X̱wi7x̱wa](https://xwi7xwa.library.ubc.ca/about/), [UBC Library home](https://xwi7xwa.library.ubc.ca/) | Everyone is welcome to visit and study; Indigenous branch of UBC Library |
@@ -45,7 +45,7 @@ Map latitude/longitude should be verified against the actual public entrance dur
 ## Further verification before campus beta
 
 1. Visit Education Learning Commons to confirm **2026–27** access and available study seating.
-2. Check ICICS for a publicly accessible walk-in zone, or remove its listing from reporting.
+2. ICICS study zones are now corroborated by UBC CS; on-site verify which atrium/stairs areas are open, and keep group rooms and restricted labs out of this general crowd estimate.
 3. Walk to EDC and Hennings seating areas to verify entrances, signage and access after class hours.
 4. Verify accessibility routes, noise categories and outlet counts in person before displaying them as filters.
 5. Consider adding official floor-specific zones with clear reporting scopes rather than multiplying generic building pins.

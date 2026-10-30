@@ -64,3 +64,10 @@ This is a working plan, not a fixed commitment. Each milestone should produce a 
 - [ ] Connect a hosting account and provision a persistent volume and backups
 - [ ] Launch HTTPS URL and conduct a small permissioned phone pilot
 - [ ] Harden production proxy-aware spam prevention and reporter verification
+
+## 2026-10-30 — Source verification refresh
+
+- [x] ICICS / CS drop-in study areas verified against the UBC CS department's informal-learning-space and access pages; original `icics` database ID retained
+- [x] Education Learning Commons confirmed as a named open study space in university sources
+- [ ] Education Learning Commons **2026–27 operational hours and access** still require confirmation; do not represent as open now
+- [ ] ICICS zone boundaries / after-hours access and library entrances should be validated during campus walkthrough

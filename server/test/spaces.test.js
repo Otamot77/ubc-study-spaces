@@ -41,10 +41,14 @@ test('Education Library renamed without changing report identity', () => {
   } finally { db.close() }
 })
 
-test('unverified ICICS study seating is never silently treated as confirmed', () => {
+test('ICICS reports refer to documented drop-in study areas, not restricted labs', () => {
   const icics = spaces.find((entry) => entry.id === 'icics')
-  assert.equal(icics.verification, 'building-only')
-  assert.ok(icics.studyNotes.toLowerCase().includes('not been verified'))
+  assert.equal(icics.name, 'ICICS / CS Study Areas')
+  assert.equal(icics.verification, 'confirmed')
+  assert.equal(icics.category, 'informal')
+  assert.match(icics.studyNotes, /first- and second-floor atrium/)
+  assert.match(icics.studyNotes, /booking/)
+  assert.match(icics.sourceUrl, /cs.ubc.ca\/students\/undergrad\/services\/informal-learning-spaces/)
 })
 
 test('X̱wi7x̱wa official Unicode spelling and stable ASCII report ID are preserved', () => {
