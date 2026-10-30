@@ -137,3 +137,13 @@ Use this template:
 **Privacy:** Keep the origin in React memory only; do not persist the coordinate to browser storage, API, SQLite, or logs.
 
 **Limitations:** Phone geolocation typically requires HTTPS (not a LAN HTTP address). Approximate building coordinates are not precise study-zone entrances. GPS inaccuracy can change ranks over short distances.
+
+## 2026-10-29 — Searchable starting-point picker and map recentering
+
+**Status:** Implemented in the frontend, pending phone UI review.
+
+**Decision:** Add a compact search field to the existing starting-point picker that filters the known campus buildings locally by name or short ID. Show an informative empty state and a clear-query control. Add a small recenter button on the Map screen; when a starting point has been chosen, it moves the camera to that GPS/manual point without changing the selected space. When no starting point exists, it opens the picker instead of silently doing nothing.
+
+**Why:** A growing list of buildings should not require long scrolling, and the map should let users quickly find their own origin again after exploring other pins.
+
+**Constraints:** Recenter does not refresh GPS or ask for location permission. It only uses the already-selected starting point. No coordinates or search terms are sent to the API.

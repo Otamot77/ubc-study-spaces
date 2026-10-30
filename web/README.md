@@ -39,7 +39,8 @@ npm run preview
 - One-tap report selections POST to the backend; tap the selected choice again to **unselect and revoke its vote**, or tap a different choice to correct it. Changes use PATCH on the same report within two minutes, without duplicate votes.
 - Persistent reports, 45-minute expiry, conflicting-report tie handling, and coarse confidence labels
 - Basic backend abuse cooldown (see [API documentation](../server/README.md))
-- Location-based discovery: choose any campus building as your starting point or explicitly request browser GPS where HTTPS is available
+- Location-based discovery: search campus buildings by name/abbreviation and choose a starting point, or explicitly request browser GPS where HTTPS is available
+- Map camera button: recenter on the chosen GPS/manual starting point; when none is set, the button opens the location picker
 - Closest sorts by approximate **straight-line geographic distance**; list, detail, and map preview show distance in metres/km
 - Your starting point stays in browser memory, never sent to the report API or stored in SQLite
 - External Google Maps walking-directions links

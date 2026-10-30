@@ -7,6 +7,7 @@ import { MAP_MARKER_ANCHOR, MAP_MARKER_SIZE, mapMarkerSvg } from '../lib/mapMark
 interface Props {
   spaces: readonly StudySpace[]
   origin: StartingPoint | null
+  originFocusRequest: number
   selectedId: string | null
   onSelect: (id: string) => void
 }
@@ -36,11 +37,12 @@ function focusOnMarker(map: L.Map, space: StudySpace) {
  * Initialise Leaflet exactly once per visible map. Report polling updates markers
  * without resetting the user's pan/zoom context every 30 seconds.
  */
-export function CampusMap({ spaces, origin, selectedId, onSelect }: Props) {
+export function CampusMap({ spaces, origin, originFocusRequest, selectedId, onSelect }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<L.Map | null>(null)
   const markersRef = useRef<Map<string, L.Marker>>(new Map())
   const originMarkerRef = useRef<L.CircleMarker | null>(null)
+  const lastOriginFocusRequestRef = useRef(0)
   const onSelectRef = useRef(onSelect)
   const spacesRef = useRef(spaces)
   spacesRef.current = spaces
@@ -147,6 +149,20 @@ export function CampusMap({ spaces, origin, selectedId, onSelect }: Props) {
       { direction: 'top', offset: [0, -8] },
     )
   }, [origin])
+
+  useEffect(() => {
+    if (originFocusRequest === lastOriginFocusRequestRef.current) return
+    lastOriginFocusRequestRef.current = originFocusRequest
+    const map = mapRef.current
+    if (!map || !origin) return
+
+    const zoom = Math.max(16, map.getZoom())
+    const point = map.project([origin.coordinates.lat, origin.coordinates.lng], zoom)
+    // Position the starting point above the selection card if one is open.
+    const centre = map.unproject(point.add(L.point(0, selectedId ? 54 : 0)), zoom)
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    map.flyTo(centre, zoom, { animate: !reducedMotion, duration: 0.42 })
+  }, [originFocusRequest, origin, selectedId])
 
   useEffect(() => {
     const map = mapRef.current

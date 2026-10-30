@@ -416,3 +416,46 @@ button:focus-visible, a:focus-visible, select:focus-visible {
 @media (hover: hover) {
   .location-picker__landmark:hover { background: #f4f7fa; }
 }
+
+/* Compact map camera control, above the selected-space preview when necessary. */
+.map-recenter {
+  position: absolute; z-index: 1100;
+  right: 14px; bottom: 16px;
+  width: 43px; height: 43px;
+  display: grid; place-items: center;
+  border: 1px solid #e1e7ee; border-radius: 13px;
+  background: #fff; color: #4e6882;
+  box-shadow: 0 2px 12px #1e293b21;
+  transition: background .14s ease, transform .14s ease;
+}
+.map-recenter--above-card { bottom: 105px; }
+.map-recenter:active { background: #edf2f8; transform: scale(.96); }
+
+/* In-sheet building search; avoids scrolling through a growing campus list. */
+.location-picker__search {
+  display: flex; align-items: center; gap: 9px;
+  min-height: 44px; padding: 0 12px; border: 1px solid #e1e6ec;
+  border-radius: 12px; background: #f6f8fa; color: #8592a0;
+}
+.location-picker__search:focus-within {
+  border-color: #99afc5; background: #fff;
+  box-shadow: 0 0 0 3px #5f88b212;
+}
+.location-picker__search-input {
+  flex: 1; width: 100%; min-width: 0; height: 43px;
+  padding: 0; border: 0; outline: 0;
+  background: transparent; color: #243648; font-size: 14px;
+}
+.location-picker__search-input::placeholder { color: #9aa4b0; }
+.location-picker__search-input::-webkit-search-cancel-button { display: none; }
+.location-picker__search-clear {
+  display: grid; place-items: center; flex-shrink: 0;
+  width: 29px; height: 29px;
+  border: 0; border-radius: 50%;
+  background: transparent; color: #83919e;
+}
+.location-picker__search-clear:active { background: #e8edf2; }
+.location-picker__empty {
+  margin: 0; padding: 19px 12px; text-align: center;
+  font-size: 12px; color: #8793a0; line-height: 1.5;
+}

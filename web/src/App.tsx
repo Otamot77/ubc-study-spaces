@@ -265,6 +265,7 @@ export default function App() {
                   selectedId={selectedId}
                   onSelect={setSelectedId}
                   onDetails={() => { if (selectedSpace) showDetails(selectedSpace) }}
+                  onChooseOrigin={openLocationPicker}
                 />}
           </div>
         )}

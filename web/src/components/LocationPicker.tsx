@@ -1,4 +1,6 @@
-import { Check, Crosshair, Info, LoaderCircle, MapPin, X } from 'lucide-react'
+import { Check, Crosshair, Info, LoaderCircle, MapPin, Search, X } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { filterBuildings } from '../lib/filterBuildings'
 import type { StartingPoint, StudySpace } from '../types'
 
 interface Props {
@@ -12,6 +14,9 @@ interface Props {
 }
 
 export function LocationPicker({ origin, spaces, locating, error, onUseGps, onChoose, onClear }: Props) {
+  const [query, setQuery] = useState('')
+  const matches = useMemo(() => filterBuildings(spaces, query), [spaces, query])
+
   return (
     <div className="location-picker">
       <p className="location-picker__intro">
@@ -30,12 +35,40 @@ export function LocationPicker({ origin, spaces, locating, error, onUseGps, onCh
           <strong>{locating ? 'Finding your location…' : 'Use my location'}</strong>
           <small>Only with your permission</small>
         </span>
-        {!locating && <MapPin size={17} color="#81909c" aria-hidden="true" />}
+        {!locating && <MapPin size={17} aria-hidden="true" />}
       </button>
       {error && <p className="location-picker__error" role="alert">{error}</p>}
       <p className="location-picker__divider"><span>Or choose a campus building</span></p>
+      <div className="location-picker__search">
+        <Search size={17} aria-hidden="true" />
+        <input
+          id="starting-point-building-search"
+          className="location-picker__search-input"
+          type="search"
+          autoComplete="off"
+          spellCheck={false}
+          aria-label="Search campus buildings"
+          placeholder="Search buildings…"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+        {query && (
+          <button
+            type="button"
+            className="location-picker__search-clear"
+            aria-label="Clear building search"
+            onClick={() => setQuery('')}
+          >
+            <X size={16} aria-hidden="true" />
+          </button>
+        )}
+      </div>
       <div className="location-picker__landmarks" role="group" aria-label="Choose a starting building">
-        {spaces.map((space) => {
+        {matches.length === 0 ? (
+          <p className="location-picker__empty" role="status">
+            No buildings found. Try a different name.
+          </p>
+        ) : matches.map((space) => {
           const selected = origin?.source === 'manual' && origin.label === space.name
           return (
             <button
