@@ -99,11 +99,11 @@ export const spaces = Object.freeze([
   {
     id: 'xwi7xwa', name: 'X̱wi7x̱wa Library',
     coordinates: { lat: 49.2654802, lng: -123.2565379 },
-    recommendedRank: 11, directionsQuery: 'Xwi7xwa Library, 1985 West Mall, UBC Vancouver',
+    recommendedRank: 11, directionsQuery: 'X̱wi7x̱wa Library, 1985 West Mall, UBC Vancouver',
     category: 'library', verification: 'confirmed',
     address: '1985 West Mall, beside the First Nations Longhouse',
-    studyNotes: 'A small Indigenous-focused library and study space. All visitors are welcome; please respect its quiet, community-centred setting.',
-    sourceUrl: 'https://xwi7xwa.library.ubc.ca/news/', hoursUrl: HOURS,
+    studyNotes: 'An Indigenous library and study space welcoming everyone. X̱wi7x̱wa means “echo” in Sḵwx̱wú7mesh Sníchim (the Squamish language).',
+    sourceUrl: 'https://xwi7xwa.library.ubc.ca/about/', hoursUrl: HOURS,
   },
   {
     id: 'hennings', name: 'Hennings — 2nd Floor Hallways',

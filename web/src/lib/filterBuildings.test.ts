@@ -13,6 +13,7 @@ const spaces: StudySpace[] = [
   { ...base, id: 'koerner', name: 'Koerner Library' },
   { ...base, id: 'woodward', name: 'Woodward Library' },
   { ...base, id: 'icics', name: 'ICICS' },
+  { ...base, id: 'xwi7xwa', name: 'X̱wi7x̱wa Library' },
 ]
 
 describe('filterBuildings', () => {
@@ -22,12 +23,23 @@ describe('filterBuildings', () => {
     expect(result).not.toBe(spaces)
   })
   it('matches building names ignoring case and extra spaces', () => {
-    expect(filterBuildings(spaces, '  liBRarY ' ).map((s) => s.id)).toEqual(['koerner','woodward'])
+    expect(filterBuildings(spaces, '  liBRarY ' ).map((s) => s.id)).toEqual(['koerner','woodward','xwi7xwa'])
     expect(filterBuildings(spaces, ' irving  barber ').map((s) => s.id)).toEqual(['ikb'])
   })
   it('matches campus abbreviations and shows no false results', () => {
     expect(filterBuildings(spaces, 'IKB').map((s) => s.id)).toEqual(['ikb'])
     expect(filterBuildings(spaces, 'ICICS').map((s) => s.id)).toEqual(['icics'])
     expect(filterBuildings(spaces, 'nonexistent')).toEqual([])
+  })
+})
+
+describe('Indigenous-language building name search', () => {
+  it('finds X̱wi7x̱wa with or without combining low lines', () => {
+    for (const query of ['X̱wi7x̱wa', 'Xwi7xwa', 'xwi7xwa', 'X̱WI7X̱WA library']) {
+      expect(filterBuildings(spaces, query).map((s) => s.id)).toEqual(['xwi7xwa'])
+    }
+  })
+  it('preserves official spelling in results instead of rewriting it', () => {
+    expect(filterBuildings(spaces, 'xwi7xwa')[0].name).toBe('X\u0331wi7x\u0331wa Library')
   })
 })

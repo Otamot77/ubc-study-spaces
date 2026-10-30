@@ -25,7 +25,7 @@
 | `education` | Education Learning Commons | Learning commons | [UBC Education Learning Commons](https://education.library.ubc.ca/), [UBC Faculty of Education](https://educ.ubc.ca/neville-scarfe-office-block-temporary-relocations-may-2025-august-2025/) | Renamed. **2025–26** space was open for studying; verify access for 2026–27 |
 | `law` | Law Library | Library | [UBC Law Library](https://law.library.ubc.ca/about/), [UBC Library hours](https://hours.library.ubc.ca/) | Confirmed library; exam-time tables may be reserved for law students |
 | `asian` | Asian Library | Library | [UBC Asian Library history](https://asian.library.ubc.ca/history-and-development/), [hours](https://hours.library.ubc.ca/) | Ground floor reorganized as a study space in 2024 |
-| `xwi7xwa` | X̱wi7x̱wa Library | Library | [2026 UBC branch announcement](https://xwi7xwa.library.ubc.ca/news/), [branch address](https://xwi7xwa.library.ubc.ca/contacts/) | Welcomes students and community visitors to study; small, quiet space |
+| `xwi7xwa` | X̱wi7x̱wa Library | Library | [UBC Library — About X̱wi7x̱wa](https://xwi7xwa.library.ubc.ca/about/), [UBC Library home](https://xwi7xwa.library.ubc.ca/) | Everyone is welcome to visit and study; Indigenous branch of UBC Library |
 | `hennings` | Hennings — 2nd Floor Hallways | Informal zone | [UBC Learning Spaces](https://learningspaces.ubc.ca/classrooms/henn-2nd-floor-hallways/) | UBC documents 62 informal seats, lamps, outlets, individual and group work |
 | `edc` | Engineering Design Centre — Study Areas | Informal zone | [UBC Learning Spaces](https://learningspaces.ubc.ca/classrooms/edc-various-informal-learning-spaces/), [UBC campus planning](https://planning.ubc.ca/wayne-and-william-white-engineering-design-centre-edc) | UBC lists multiple informal study areas at 2345 East Mall |
 
@@ -49,3 +49,12 @@ Map latitude/longitude should be verified against the actual public entrance dur
 3. Walk to EDC and Hennings seating areas to verify entrances, signage and access after class hours.
 4. Verify accessibility routes, noise categories and outlet counts in person before displaying them as filters.
 5. Consider adding official floor-specific zones with clear reporting scopes rather than multiplying generic building pins.
+
+## Indigenous-language spelling: X̱wi7x̱wa
+
+UBC Library officially writes this name **X̱wi7x̱wa Library**. The initial uppercase `X` and internal lowercase `x` are each followed by Unicode **U+0331 COMBINING MACRON BELOW**; the character `7` is intentional. Keep this exact spelling in display names, map labels, details, source documentation and directions queries, rather than reducing it to `Xwi7xwa`.
+
+- Official spelling, meaning and pronunciation guidance: [UBC Library — About X̱wi7x̱wa](https://xwi7xwa.library.ubc.ca/about/).
+- UBC describes the name as meaning **“echo” in Sḵwx̱wú7mesh Sníchim (Squamish language)**.
+- The ASCII key `xwi7xwa` is retained **only as the stable database/report ID** and for forgiving search input. Search matching removes combining marks on temporary comparison strings but **never modifies the stored or displayed name**.
+- Avoid inventing a phonetic rendering: UBC Library provides official pronunciation resources and notes the need for care when presenting Indigenous names.

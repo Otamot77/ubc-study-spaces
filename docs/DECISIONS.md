@@ -167,3 +167,9 @@ Use this template:
 **Why:** Useful geographic discovery depends more on trustworthy location data than on decorative UI or unverified amenities. Full source audit: [STUDY_SPACE_DATA.md](STUDY_SPACE_DATA.md).
 
 **Next validation:** On-site check of public entrances and Scarfe/ICICS access; inspect long venue names on phone; do not add noise/outlet filters until consistently verified.
+
+## 2026-10-29 — Preserve X̱wi7x̱wa's official name
+
+**Decision:** Match the official spelling **X̱wi7x̱wa Library** in the API, app display, directions query, and documentation, including the combining lines under both X characters and the numeral 7. Link the venue directly to UBC Library's name and pronunciation history. Keep the stable ASCII database ID `xwi7xwa` for existing reports. Enable searches with and without diacritics without changing how the name is shown.
+
+**Source:** [UBC Library — About X̱wi7x̱wa](https://xwi7xwa.library.ubc.ca/about/). Tests protect the exact Unicode spelling in server data, API responses and client search.

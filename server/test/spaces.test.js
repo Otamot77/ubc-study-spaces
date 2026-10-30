@@ -46,3 +46,14 @@ test('unverified ICICS study seating is never silently treated as confirmed', ()
   assert.equal(icics.verification, 'building-only')
   assert.ok(icics.studyNotes.toLowerCase().includes('not been verified'))
 })
+
+test('X̱wi7x̱wa official Unicode spelling and stable ASCII report ID are preserved', () => {
+  const library = spaces.find((entry) => entry.id === 'xwi7xwa')
+  // Exact UBC Library spelling: both X/x characters carry COMBINING MACRON BELOW.
+  assert.equal(library.name, 'X\u0331wi7x\u0331wa Library')
+  assert.equal(library.name.normalize('NFD'), 'X\u0331wi7x\u0331wa Library')
+  assert.ok(library.directionsQuery.startsWith(library.name))
+  assert.equal(library.sourceUrl, 'https://xwi7xwa.library.ubc.ca/about/')
+  assert.match(library.studyNotes, /Sḵwx̱wú7mesh Sníchim/)
+  assert.ok(spaceIds.has('xwi7xwa'))
+})

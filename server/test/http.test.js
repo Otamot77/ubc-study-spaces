@@ -40,3 +40,11 @@ test('rejects invalid bodies, unknown IDs, and immediate repeated reports', asyn
     assert.equal((await post('/api/spaces/koerner/reports', { level: 'high' })).status, 429)
   })
 })
+
+test('API preserves Indigenous spelling rather than falling back to ASCII', async () => {
+  await withServer(async (base) => {
+    const { spaces } = await (await fetch(base + '/api/spaces')).json()
+    const library = spaces.find((space) => space.id === 'xwi7xwa')
+    assert.equal(library.name, 'X\u0331wi7x\u0331wa Library')
+  })
+})
