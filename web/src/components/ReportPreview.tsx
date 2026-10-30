@@ -66,7 +66,7 @@ export function ReportPreview({ spaces, selected, onSelect, onSuccess }: Props) 
 
       if (savedReport) {
         setSavedReport({ ...savedReport, level })
-      } else if (data && Number.isSafeInteger(data.reportId) &&
+      } else if (data && typeof data.reportId === 'number' && Number.isSafeInteger(data.reportId) &&
                  typeof data.editToken === 'string' && typeof data.editableUntil === 'string' &&
                  Number.isFinite(Date.parse(data.editableUntil))) {
         setSavedReport({
