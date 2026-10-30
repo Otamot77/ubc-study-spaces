@@ -1,6 +1,8 @@
 import { CheckCircle2, Info, LoaderCircle } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ReportLocationPicker } from './ReportLocationPicker'
+import { buildReportRequest, correctionAllowed } from '../lib/reportFlow'
+import type { ReportLevel, SavedReport } from '../lib/reportFlow'
 import type { StudySpace } from '../types'
 
 interface Props {
@@ -10,87 +12,133 @@ interface Props {
   onSuccess: () => void
 }
 
-const options = [
+const options: { id: ReportLevel; label: string; detail: string }[] = [
   { id: 'low', label: 'Plenty of seats', detail: 'Lots of places to sit' },
   { id: 'moderate', label: 'Some seats', detail: 'Some spots are open' },
   { id: 'high', label: 'Almost full', detail: 'Very limited seating' },
-] as const
+]
 
 export function ReportPreview({ spaces, selected, onSelect, onSuccess }: Props) {
-  const [choice, setChoice] = useState<string | null>(null)
+  const [pendingLevel, setPendingLevel] = useState<ReportLevel | null>(null)
+  const [savedReport, setSavedReport] = useState<SavedReport | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [correctionExpired, setCorrectionExpired] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const requestInFlight = useRef(false)
 
-  // Switching locations should not carry an earlier failed selection or message.
+  // Changing buildings starts a new report; prior edit tokens never transfer.
   useEffect(() => {
-    setChoice(null)
-    setSaved(false)
+    setPendingLevel(null)
+    setSavedReport(null)
+    setCorrectionExpired(false)
     setError(null)
   }, [selected.id])
 
-  async function submit(level: (typeof options)[number]['id']) {
-    if (submitting || saved) return
-    setChoice(level)
+  async function submit(level: ReportLevel) {
+    if (requestInFlight.current || correctionExpired || savedReport?.level === level) return
+    if (savedReport && !correctionAllowed(savedReport)) {
+      setCorrectionExpired(true)
+      setError('This report can no longer be changed. Close and reopen Report to submit a new observation later.')
+      return
+    }
+
+    requestInFlight.current = true
+    setPendingLevel(level)
     setSubmitting(true)
     setError(null)
     try {
-      const response = await fetch(`/api/spaces/${encodeURIComponent(selected.id)}/reports`, {
-        method: 'POST',
+      const request = buildReportRequest(selected.id, level, savedReport)
+      const response = await fetch(request.url, {
+        method: request.method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ level }),
+        body: request.body,
       })
+      const data = await response.json().catch(() => null) as {
+        error?: string
+        reportId?: number
+        editToken?: string
+        editableUntil?: string
+      } | null
       if (!response.ok) {
-        const payload = await response.json().catch(() => null) as { error?: string } | null
-        throw new Error(payload?.error || `Report failed (${response.status})`)
+        if (savedReport && response.status === 409) setCorrectionExpired(true)
+        throw new Error(data?.error || 'Could not save your report. Please try again.')
       }
-      setSaved(true)
+
+      if (savedReport) {
+        setSavedReport({ ...savedReport, level })
+      } else if (data && Number.isSafeInteger(data.reportId) &&
+                 typeof data.editToken === 'string' && typeof data.editableUntil === 'string' &&
+                 Number.isFinite(Date.parse(data.editableUntil))) {
+        setSavedReport({
+          reportId: data.reportId,
+          editToken: data.editToken,
+          editableUntil: Date.parse(data.editableUntil),
+          level,
+        })
+      } else {
+        // Saved on the API but editing is unavailable: don't invite duplicate POSTs.
+        setCorrectionExpired(true)
+        setError('Your report was saved, but it cannot be corrected in this session.')
+      }
       onSuccess()
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not submit report.')
+      setError(cause instanceof Error ? cause.message : 'Could not save your report.')
     } finally {
+      requestInFlight.current = false
+      setPendingLevel(null)
       setSubmitting(false)
     }
   }
+
+  const highlighted = pendingLevel ?? savedReport?.level ?? null
+  const savedSuccessfully = savedReport !== null
 
   return (
     <div className="report-sheet">
       <ReportLocationPicker
         spaces={spaces}
         selected={selected}
-        disabled={submitting || saved}
+        disabled={submitting || savedSuccessfully || correctionExpired}
         onSelect={onSelect}
       />
       <p className="field-label report-question">How busy is it right now?</p>
-      <div className="report-options" role="group" aria-label="Submit a busyness report">
+      <div className="report-options" role="group" aria-label="Report busyness; tap a different answer to correct a saved report">
         {options.map((option) => (
           <button
             key={option.id}
             type="button"
-            className={'report-choice' + (choice === option.id ? ' report-choice--active' : '')}
-            aria-pressed={choice === option.id}
-            disabled={submitting || saved}
+            className={'report-choice' + (highlighted === option.id ? ' report-choice--active' : '')}
+            aria-pressed={highlighted === option.id}
+            disabled={submitting || correctionExpired}
             onClick={() => { void submit(option.id) }}
           >
             <span>
               <strong>{option.label}</strong>
               <small>{option.detail}</small>
             </span>
-            {submitting && choice === option.id
+            {submitting && pendingLevel === option.id
               ? <LoaderCircle className="loading-spin" size={21} aria-hidden="true" />
-              : choice === option.id
+              : highlighted === option.id
                 ? <CheckCircle2 size={21} aria-hidden="true" />
                 : <span className="report-choice__circle" aria-hidden="true" />}
           </button>
         ))}
       </div>
-      <p className={'report-disclaimer' + (error ? ' report-disclaimer--error' : '')} role="status" aria-live="polite">
-        <Info size={16} aria-hidden="true" />
-        {saved
-          ? 'Report saved! Thank you. Your submission now contributes to recent occupancy.'
-          : error || (submitting
-            ? 'Submitting your report…'
-            : 'Tap one option to submit a real anonymous report. Only report what you see in person.')}
+      <p
+        className={'report-disclaimer' + (error ? ' report-disclaimer--error' : savedSuccessfully ? ' report-disclaimer--saved' : '')}
+        role="status"
+        aria-live="polite"
+      >
+        {savedSuccessfully && !error
+          ? <CheckCircle2 size={16} aria-hidden="true" />
+          : <Info size={16} aria-hidden="true" />}
+        {error
+          ? error
+          : submitting
+            ? savedSuccessfully ? 'Updating your report…' : 'Saving your report…'
+            : savedSuccessfully
+              ? 'Saved! Tap a different option to correct your answer within 2 minutes. No duplicate report will be added.'
+              : 'Tap an option to submit. Only report what you see in person.'}
       </p>
     </div>
   )

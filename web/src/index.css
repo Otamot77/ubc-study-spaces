@@ -356,3 +356,8 @@ button:focus-visible, a:focus-visible, select:focus-visible {
 @media (hover: hover) {
   .report-location__option:hover { background: #f3f6f9; }
 }
+
+/* Visible confirmation after an immediate one-tap submission, with corrections available. */
+.report-disclaimer--saved { color: #187253; }
+.report-disclaimer--saved svg { color: #18805e; }
+.report-choice:disabled { opacity: .72; cursor: wait; }

@@ -36,7 +36,7 @@ npm run preview
 - Fixed app header and navigation; independent list scrolling
 - Interactive eight-building UBC map with two-tone markers
 - Live-retrieved occupancy from `GET /api/spaces`, automatically refreshed every 30 seconds
-- One-tap report selections actually POST to the backend and update the list/map
+- One-tap report selections actually POST to the backend and update the list/map; tapping a different option within two minutes corrects the same report via PATCH, without adding a duplicate vote
 - Persistent reports, 45-minute expiry, conflicting-report tie handling, and coarse confidence labels
 - Basic backend abuse cooldown (see [API documentation](../server/README.md))
 - External Google Maps walking-directions links
