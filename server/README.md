@@ -18,9 +18,9 @@ The SQLite database is created automatically at `server/data/study-spaces.sqlite
 - `GET /api/health` — service health
 - `GET /api/spaces` — eight real, approximate building locations and their aggregated recent reports
 - `POST /api/spaces/:id/reports` — JSON `{"level":"low"|"moderate"|"high"}`; returns 201 and a one-time report ID + private edit token
-- `PATCH /api/spaces/:id/reports/:reportId` — JSON `{"level":"low"|"moderate"|"high","editToken":"..."}` to correct the **same report** for two minutes after submission (maximum five corrections); 200 on success, 409 if authorization fails or the window expires
+- `PATCH /api/spaces/:id/reports/:reportId` — JSON `{"level":"low"|"moderate"|"high"|null,"editToken":"..."}` to update or revoke the **same report** for two minutes after submission (maximum five changes); 200 on success, 409 if authorization fails or the window expires
 
-The UI immediately submits one tap, then lets the reporter tap a different status to correct a mistake without creating a duplicate vote. The edit token is held only in the active form, not in browser storage. Older reports are migrated automatically when the API starts. Correcting a vote never changes its original timestamp or extends its 45-minute lifetime.
+The UI submits on the first tap. Tapping the already-selected option again **revokes the report's vote**, so it disappears from occupancy counts; tapping a different option selects or changes it. A revoked report can be restored within the same two-minute correction window with the same private token, without bypassing the initial submission cooldown or double-counting. The edit token is held only in the active form, not in browser storage. Older reports are migrated automatically when the API starts. Correcting a vote never changes its original timestamp or extends its 45-minute lifetime.
 
 After 45 minutes without recent reports, status becomes **unknown**. A two-way tie also returns unknown. The response includes report count, freshness, and coarse confidence.
 

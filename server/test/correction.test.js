@@ -62,3 +62,37 @@ test('migrates pre-existing databases without deleting reports', () => {
     } finally { db.close() }
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
+
+test('tapping selected status again revokes the vote; tapping another status restores one vote', () => {
+  const db = openDatabase(':memory:')
+  try {
+    const now = 1_000_000
+    const { reportId, editToken } = addReport(db, 'koerner', 'low', now)
+    assert.equal(occupancy(db, 'koerner', now).recentReportCount, 1)
+    assert.equal(correctReport(db, 'koerner', reportId, editToken, null, now + 1_000), true)
+    assert.deepEqual(occupancy(db, 'koerner', now + 1_000), {
+      busyness: 'unknown', recentReportCount: 0, latestReportMinutesAgo: null, confidence: 'none',
+    })
+    assert.equal(correctReport(db, 'koerner', reportId, editToken, 'high', now + 2_000), true)
+    const restored = occupancy(db, 'koerner', now + 2_000)
+    assert.equal(restored.busyness, 'high')
+    assert.equal(restored.recentReportCount, 1)
+    assert.equal(restored.latestReportMinutesAgo, 0)
+  } finally { db.close() }
+})
+
+test('revoked reports survive restart without counting towards occupancy', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'study-spaces-revoke-'))
+  const path = join(dir, 'reports.sqlite')
+  try {
+    const db = openDatabase(path)
+    const now = 1_000_000
+    const { reportId, editToken } = addReport(db, 'ikb', 'moderate', now)
+    assert.equal(correctReport(db, 'ikb', reportId, editToken, null, now + 1), true)
+    db.close()
+    const reopened = openDatabase(path)
+    try {
+      assert.equal(occupancy(reopened, 'ikb', now + 2).recentReportCount, 0)
+    } finally { reopened.close() }
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})

@@ -32,6 +32,9 @@ export function openDatabase(path = process.env.STUDY_SPACES_DB_PATH || DEFAULT_
   if (!columns.some((col) => col.name === 'edit_count')) {
     db.exec('ALTER TABLE reports ADD COLUMN edit_count INTEGER NOT NULL DEFAULT 0')
   }
+  if (!columns.some((col) => col.name === 'revoked')) {
+    db.exec('ALTER TABLE reports ADD COLUMN revoked INTEGER NOT NULL DEFAULT 0')
+  }
   return db
 }
 
@@ -50,25 +53,26 @@ export function addReport(db, spaceId, level, now = Date.now()) {
 
 /**
  * A bearer edit token may change only its own report, no later than two
- * minutes after submission. Corrections keep the original timestamp and
- * count as the same vote; they do not extend report freshness.
+ * minutes after submission. Passing null revokes the vote without removing
+ * its edit token, so the reporter can reselect within that same window.
+ * Changes preserve the original timestamp and never add a duplicate vote.
  */
 export function correctReport(db, spaceId, reportId, editToken, level, now = Date.now()) {
-  if (!VALID_LEVELS.has(level)) throw new TypeError('Invalid report level')
+  if (level !== null && !VALID_LEVELS.has(level)) throw new TypeError('Invalid report level')
   if (!Number.isSafeInteger(reportId) || reportId < 1) return false
   if (typeof editToken !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(editToken)) return false
   const result = db.prepare(`
     UPDATE reports
-    SET level = ?, edit_count = edit_count + 1
+    SET level = COALESCE(?, level), revoked = ?, edit_count = edit_count + 1
     WHERE id = ? AND space_id = ? AND edit_token_hash = ?
       AND created_at >= ? AND created_at <= ? AND edit_count < 5
-  `).run(level, reportId, spaceId, tokenHash(editToken), now - CORRECTION_MS, now)
+  `).run(level, level === null ? 1 : 0, reportId, spaceId, tokenHash(editToken), now - CORRECTION_MS, now)
   return result.changes === 1
 }
 
 export function occupancy(db, spaceId, now = Date.now()) {
   const rows = db.prepare(
-    'SELECT level, created_at FROM reports WHERE space_id = ? AND created_at > ? AND created_at <= ? ORDER BY created_at DESC LIMIT 300'
+    'SELECT level, created_at FROM reports WHERE space_id = ? AND revoked = 0 AND created_at > ? AND created_at <= ? ORDER BY created_at DESC LIMIT 300'
   ).all(spaceId, now - WINDOW_MS, now)
 
   if (!rows.length) {

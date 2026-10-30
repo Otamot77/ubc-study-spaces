@@ -115,15 +115,18 @@ export function makeServer({ db, clock = () => Date.now(), limiter = createRateL
         }
         const body = await readJson(req)
         if (!body || typeof body !== 'object' || Array.isArray(body) ||
-            Object.keys(body).length !== 2 || !VALID_LEVELS.has(body.level) ||
+            Object.keys(body).length !== 2 || (body.level !== null && !VALID_LEVELS.has(body.level)) ||
             typeof body.editToken !== 'string') {
-          return json(res, 400, { error: 'Expected a valid level and edit token' })
+          return json(res, 400, { error: 'Expected low, moderate, high, or null, plus an edit token' })
         }
         const now = clock()
         if (!correctReport(db, spaceId, reportId, body.editToken, body.level, now)) {
           return json(res, 409, { error: 'Could not change this report. The correction window may have expired.' })
         }
-        return json(res, 200, { saved: true, corrected: true, spaceId, reportId, ...occupancy(db, spaceId, now) })
+        return json(res, 200, {
+          saved: body.level !== null, corrected: true, revoked: body.level === null,
+          spaceId, reportId, ...occupancy(db, spaceId, now),
+        })
       }
       if (!['GET', 'POST', 'PATCH'].includes(req.method)) return json(res, 405, { error: 'Method not allowed' }, { Allow: 'GET, POST, PATCH' })
       return json(res, 404, { error: 'Not found' })

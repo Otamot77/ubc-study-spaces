@@ -60,3 +60,32 @@ test('corrections require the secret and expire; ordinary POST cooldown still ap
     assert.equal(nest.busyness, 'low')
   })
 })
+
+test('tapping selected option again unselects it without creating or retaining a vote', async () => {
+  let now = 2_000_000
+  await withServer(() => now, async (base) => {
+    const path = '/api/spaces/koerner/reports'
+    const created = await (await send(base, path, 'POST', { level: 'moderate' })).json()
+    now += 1_000
+    const undone = await send(base, path + '/' + created.reportId, 'PATCH', {
+      level: null,
+      editToken: created.editToken,
+    })
+    assert.equal(undone.status, 200)
+    assert.deepEqual((( { revoked, saved, recentReportCount, busyness }) =>
+      ({ revoked, saved, recentReportCount, busyness }))(await undone.json()), {
+      revoked: true, saved: false, recentReportCount: 0, busyness: 'unknown',
+    })
+    const fetched = await (await fetch(base + '/api/spaces')).json()
+    assert.equal(fetched.spaces.find((s) => s.id === 'koerner').recentReportCount, 0)
+    assert.equal((await send(base, path, 'POST', { level: 'high' })).status, 429)
+    now += 1_000
+    const restored = await send(base, path + '/' + created.reportId, 'PATCH', {
+      level: 'high', editToken: created.editToken,
+    })
+    assert.equal(restored.status, 200)
+    const report = await restored.json()
+    assert.equal(report.busyness, 'high')
+    assert.equal(report.recentReportCount, 1)
+  })
+})
