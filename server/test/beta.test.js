@@ -17,7 +17,7 @@ test('exposes safe beta configuration and keeps public reads available', async (
     const config = await (await fetch(url + '/api/config')).json()
     assert.deepEqual(config, { betaAccessRequired: true })
     const data = await (await fetch(url + '/api/spaces')).json()
-    assert.equal(data.spaces.length, 8)
+    assert.equal(data.spaces.length, 13)
   })
 })
 

@@ -245,7 +245,7 @@ export default function App() {
             <>
               <div className="list-title">
                 <h2>Study spaces</h2>
-                <span>{spaces.length} buildings</span>
+                <span>{spaces.length} locations</span>
               </div>
               <section className="space-list" aria-label="Study spaces">
                 {spaces.map((space) => (
@@ -257,7 +257,7 @@ export default function App() {
                   />
                 ))}
               </section>
-              <p className="list-end">All {spaces.length} campus buildings shown · Google Maps handles walking routes</p>
+              <p className="list-end">All {spaces.length} campus study locations shown · Google Maps handles walking routes</p>
             </>
           )}
         </div>
@@ -304,6 +304,32 @@ export default function App() {
                 : 'No recent reports'}
             </p>
             <p className="sheet-note">Reports expire after 45 minutes. Occupancy is unverified. {selectedSpace.distanceMeters !== null && 'Distances are straight-line estimates, not walking distances.'}</p>
+            {selectedSpace.address && (
+              <div className="space-info">
+                <p className="space-info__eyebrow">{selectedSpace.category === 'library' ? 'Library' : selectedSpace.category === 'learning-commons' ? 'Learning commons' : selectedSpace.category === 'informal' ? 'Informal study area' : 'Campus building'}</p>
+                <p className="space-info__address"><MapPin size={15} aria-hidden="true" /> {selectedSpace.address}</p>
+                {selectedSpace.studyNotes && <p className="space-info__note">{selectedSpace.studyNotes}</p>}
+                {selectedSpace.verification !== 'confirmed' && (
+                  <p className="space-info__caution">
+                    {selectedSpace.verification === 'building-only'
+                      ? 'Study seating and public access at this building are not yet verified.'
+                      : 'Study area access or availability needs another on-campus check.'}
+                  </p>
+                )}
+                <div className="space-info__links">
+                  {selectedSpace.sourceUrl && (
+                    <a href={selectedSpace.sourceUrl} target="_blank" rel="noopener noreferrer">
+                      UBC source <ExternalLink size={13} aria-hidden="true" />
+                    </a>
+                  )}
+                  {selectedSpace.hoursUrl && (
+                    <a href={selectedSpace.hoursUrl} target="_blank" rel="noopener noreferrer">
+                      Check current hours <ExternalLink size={13} aria-hidden="true" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
             <a href={directionsUrl(selectedSpace)} className="action action--primary" target="_blank" rel="noopener noreferrer">
               <Navigation size={18} aria-hidden="true" /> Get directions <ExternalLink size={15} aria-hidden="true" />
             </a>

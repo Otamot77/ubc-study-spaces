@@ -472,3 +472,16 @@ button:focus-visible, a:focus-visible, select:focus-visible {
   border-color: #809dbb; outline: 3px solid #b5cee854; outline-offset: 1px;
 }
 .report-beta__hint { margin: 0; font-size: 11px; line-height: 1.4; color: #8793a0; }
+
+/* Evidence-backed venue details, only shown in the details sheet. */
+.space-info {
+  display: grid; gap: 8px; padding: 12px;
+  border: 1px solid #e8ebef; border-radius: 12px; background: #fbfcfd;
+}
+.space-info__eyebrow { margin: 0; color: #64758a; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; font-weight: 780; }
+.space-info__address { display: flex; align-items: flex-start; gap: 7px; margin: 0; font-size: 12px; color: #34475b; }
+.space-info__address svg { flex-shrink: 0; color: #8291a1; margin-top: 1px; }
+.space-info__note { margin: 0; font-size: 12px; color: #586778; line-height: 1.5; }
+.space-info__caution { margin: 0; padding: 9px; border-radius: 8px; background: #fff4e4; color: #886125; font-size: 11px; line-height: 1.45; }
+.space-info__links { display: flex; gap: 15px; flex-wrap: wrap; padding-top: 2px; }
+.space-info__links a { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 680; color: #42698c; }

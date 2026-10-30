@@ -6,7 +6,7 @@ export function filterBuildings(spaces: readonly StudySpace[], query: string): S
   if (terms.length === 0) return [...spaces]
   return spaces.filter((space) => {
     // Also match IDs like "ikb" and "icics" used as campus abbreviations.
-    const searchable = (space.name + ' ' + space.id).toLocaleLowerCase()
+    const searchable = (space.name + ' ' + space.id + ' ' + (space.address ?? '')).toLocaleLowerCase()
     return terms.every((term) => searchable.includes(term))
   })
 }

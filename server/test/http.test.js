@@ -15,7 +15,7 @@ async function withServer(callback) {
 test('GET starts unknown and POST persists a genuine crowd report', async () => {
   await withServer(async (base) => {
     const before = await (await fetch(base + '/api/spaces')).json()
-    assert.equal(before.spaces.length, 8)
+    assert.equal(before.spaces.length, 13)
     assert.equal(before.spaces.find((s) => s.id === 'koerner').busyness, 'unknown')
     assert.equal(before.spaces[0].walkingMinutes, null)
     const response = await fetch(base + '/api/spaces/koerner/reports', {

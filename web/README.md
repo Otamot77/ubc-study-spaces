@@ -34,7 +34,7 @@ npm run preview
 ## Working features
 
 - Fixed app header and navigation; independent list scrolling
-- Interactive eight-building UBC map with two-tone markers
+- Interactive 13-location UBC map with two-tone markers; includes verified library branches and specifically named informal study areas
 - Live-retrieved occupancy from `GET /api/spaces`, automatically refreshed every 30 seconds
 - One-tap report selections POST to the backend; tap the selected choice again to **unselect and revoke its vote**, or tap a different choice to correct it. Changes use PATCH on the same report within two minutes, without duplicate votes.
 - Persistent reports, 45-minute expiry, conflicting-report tie handling, and coarse confidence labels
@@ -48,7 +48,7 @@ npm run preview
 
 ## Honest limits
 
-All buildings have genuine **approximate coordinates**, not verified study-zone entrances. No sample crowding is seeded: without reports, occupancy is Unknown. Reports are anonymous and unverified, so they are not guaranteed to represent actual available seating. Walking time is **not yet calculated**. Closest is enabled once you select a starting point; distances are straight-line approximations, not walking distances or travel-time predictions. Recommended is currently a transparent baseline based on crowding level, confidence, and a curated fallback order—not a personalization algorithm.
+All locations have **approximate building-level coordinates**, not verified study-zone entrances. The Details sheet includes addresses, source links, study notes, and (for UBC libraries) a link to UBC's up-to-date hours. The Education Library has been renamed Education Learning Commons because its collections moved in 2025; its current study-area access should be rechecked. The ICICS building is listed with an explicit unverified-study-seating warning. No sample crowding is seeded: without reports, occupancy is Unknown. Reports are anonymous and unverified, so they are not guaranteed to represent actual available seating. Walking time is **not yet calculated**. Closest is enabled once you select a starting point; distances are straight-line approximations, not walking distances or travel-time predictions. Recommended is currently a transparent baseline based on crowding level, confidence, and a curated fallback order—not a personalization algorithm.
 
 The SQLite database exists only on the laptop running the API. Other phones on the same local network can report through Vite, but there is **no public backend deployment**, student verification, production anti-spam protection, GPS, push notifications, or installable PWA yet. The app deliberately shows an offline state when the API is not running rather than fabricated occupancy.
 
@@ -63,3 +63,5 @@ Select **From → Choose starting point** or tap **Closest**, choose a building,
 ## HTTPS pilot
 
 A production container serves the built frontend and API from one origin. If `GET /api/config` indicates an invite-only beta, the report sheet shows a password-style access-code input. The code is held only in the current app memory and sent as a request header for report writes. See [deployment guide](../docs/DEPLOYMENT.md). Browser GPS can be tested on an HTTPS hosted site; nothing has been deployed yet.
+
+The research trail for these listings is maintained in [Study-space data audit](../docs/STUDY_SPACE_DATA.md). Library hours vary by date, so the app deliberately links to the official hours page instead of claiming any location is currently open.

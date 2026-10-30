@@ -29,4 +29,10 @@ export interface StudySpace {
   confidence: Confidence
   recommendedRank: number
   directionsQuery: string
+  category?: 'library' | 'learning-commons' | 'informal' | 'building'
+  verification?: 'confirmed' | 'check-access' | 'building-only'
+  address?: string
+  studyNotes?: string
+  sourceUrl?: string
+  hoursUrl?: string
 }
