@@ -1,11 +1,12 @@
 import { useEffect, useRef } from 'react'
 import * as L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import type { Busyness, StudySpace } from '../types'
+import type { Busyness, StartingPoint, StudySpace } from '../types'
 import { MAP_MARKER_ANCHOR, MAP_MARKER_SIZE, mapMarkerSvg } from '../lib/mapMarkerIcons'
 
 interface Props {
   spaces: readonly StudySpace[]
+  origin: StartingPoint | null
   selectedId: string | null
   onSelect: (id: string) => void
 }
@@ -35,10 +36,11 @@ function focusOnMarker(map: L.Map, space: StudySpace) {
  * Initialise Leaflet exactly once per visible map. Report polling updates markers
  * without resetting the user's pan/zoom context every 30 seconds.
  */
-export function CampusMap({ spaces, selectedId, onSelect }: Props) {
+export function CampusMap({ spaces, origin, selectedId, onSelect }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<L.Map | null>(null)
   const markersRef = useRef<Map<string, L.Marker>>(new Map())
+  const originMarkerRef = useRef<L.CircleMarker | null>(null)
   const onSelectRef = useRef(onSelect)
   const spacesRef = useRef(spaces)
   spacesRef.current = spaces
@@ -78,6 +80,7 @@ export function CampusMap({ spaces, selectedId, onSelect }: Props) {
       cancelAnimationFrame(frame)
       map.remove()
       markersRef.current.clear()
+      originMarkerRef.current = null
       mapRef.current = null
     }
   }, [])
@@ -117,6 +120,33 @@ export function CampusMap({ spaces, selectedId, onSelect }: Props) {
       }
     }
   }, [spaces, selectedId])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    if (!origin) {
+      originMarkerRef.current?.remove()
+      originMarkerRef.current = null
+      return
+    }
+
+    const location: L.LatLngExpression = [origin.coordinates.lat, origin.coordinates.lng]
+    if (!originMarkerRef.current) {
+      originMarkerRef.current = L.circleMarker(location, {
+        radius: 7, weight: 3, color: '#fff',
+        fillColor: '#5075a5', fillOpacity: 1, opacity: 1,
+        bubblingMouseEvents: false,
+      }).addTo(map)
+      originMarkerRef.current.bringToFront()
+    } else {
+      originMarkerRef.current.setLatLng(location)
+    }
+    originMarkerRef.current.unbindTooltip()
+    originMarkerRef.current.bindTooltip(
+      origin.source === 'gps' ? 'My location (approximate)' : `Starting point: ${origin.label}`,
+      { direction: 'top', offset: [0, -8] },
+    )
+  }, [origin])
 
   useEffect(() => {
     const map = mapRef.current

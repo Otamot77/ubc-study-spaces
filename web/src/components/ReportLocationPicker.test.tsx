@@ -8,6 +8,7 @@ const space: StudySpace = {
   name: 'Koerner Library',
   coordinates: { lat: 49.2666, lng: -123.2551 },
   walkingMinutes: null,
+  distanceMeters: null,
   busyness: 'unknown',
   recentReportCount: 0,
   latestReportMinutesAgo: null,

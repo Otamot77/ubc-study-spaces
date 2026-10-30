@@ -10,9 +10,8 @@ const confidencePenalty = { high: 0, medium: 1, low: 2, none: 3 } as const
 
 export function sortStudySpaces(spaces: readonly StudySpace[], mode: SortMode): StudySpace[] {
   return [...spaces].sort((a, b) => {
-    // Ready for geolocation: unknown walk times always come last.
     if (mode === 'closest') {
-      return (a.walkingMinutes ?? Infinity) - (b.walkingMinutes ?? Infinity) ||
+      return (a.distanceMeters ?? Infinity) - (b.distanceMeters ?? Infinity) ||
         a.recommendedRank - b.recommendedRank
     }
 
@@ -21,8 +20,7 @@ export function sortStudySpaces(spaces: readonly StudySpace[], mode: SortMode): 
         a.recommendedRank - b.recommendedRank
     }
 
-    // Transparent baseline: estimated availability, then reliability,
-    // then the established building order. Unknown is always last.
+    // Baseline: availability, confidence, and established building order.
     return busynessOrder[a.busyness] - busynessOrder[b.busyness] ||
       confidencePenalty[a.confidence] - confidencePenalty[b.confidence] ||
       a.recommendedRank - b.recommendedRank

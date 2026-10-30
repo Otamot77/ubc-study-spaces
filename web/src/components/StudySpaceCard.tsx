@@ -1,4 +1,5 @@
-import { ChevronRight, Footprints, MapPin } from 'lucide-react'
+import { ChevronRight, MapPin } from 'lucide-react'
+import { formatDistance } from '../lib/distance'
 import type { StudySpace } from '../types'
 import { BusynessIndicator } from './BusynessIndicator'
 
@@ -27,9 +28,8 @@ export function StudySpaceCard({ space, selected, onSelect }: Props) {
         </div>
         <div className="space-card__summary">
           <span className="walking-time">
-            {space.walkingMinutes === null
-              ? <><MapPin size={16} strokeWidth={1.8} aria-hidden="true" /> UBC campus</>
-              : <><Footprints size={16} strokeWidth={1.8} aria-hidden="true" /> {space.walkingMinutes} min walk</>}
+            <MapPin size={16} strokeWidth={1.8} aria-hidden="true" />
+            {space.distanceMeters === null ? 'UBC campus' : formatDistance(space.distanceMeters)}
           </span>
           <BusynessIndicator busyness={space.busyness} />
         </div>

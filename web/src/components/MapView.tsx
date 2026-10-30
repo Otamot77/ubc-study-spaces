@@ -1,10 +1,12 @@
 import { ChevronRight } from 'lucide-react'
-import type { StudySpace } from '../types'
+import type { StartingPoint, StudySpace } from '../types'
+import { formatDistance } from '../lib/distance'
 import { BusynessIndicator } from './BusynessIndicator'
 import { CampusMap } from './CampusMap'
 
 interface Props {
   spaces: readonly StudySpace[]
+  origin: StartingPoint | null
   selected: StudySpace | null
   selectedId: string | null
   onSelect: (id: string) => void
@@ -15,10 +17,10 @@ interface Props {
  * Map mode is geographic discovery: every marker remains visible.
  * List sorting does not apply to the positions of buildings on the map.
  */
-export function MapView({ spaces, selected, selectedId, onSelect, onDetails }: Props) {
+export function MapView({ spaces, origin, selected, selectedId, onSelect, onDetails }: Props) {
   return (
     <section className="map-preview" aria-label="UBC campus map">
-      <CampusMap spaces={spaces} selectedId={selectedId} onSelect={onSelect} />
+      <CampusMap spaces={spaces} origin={origin} selectedId={selectedId} onSelect={onSelect} />
       {selected && (
         <button
           className="map-selection-card"
@@ -30,7 +32,7 @@ export function MapView({ spaces, selected, selectedId, onSelect, onDetails }: P
             <strong className="map-selection-card__name">{selected.name}</strong>
             <span className="map-selection-card__meta">
               <BusynessIndicator busyness={selected.busyness} />
-              <span className="map-selection-card__demo">{selected.recentReportCount ? `${selected.recentReportCount} recent reports` : "No recent reports"}</span>
+              <span className="map-selection-card__demo">{selected.distanceMeters === null ? (selected.recentReportCount ? `${selected.recentReportCount} recent reports` : 'No recent reports') : formatDistance(selected.distanceMeters)}</span>
             </span>
           </span>
           <ChevronRight size={20} className="map-selection-card__chevron" aria-hidden="true" />

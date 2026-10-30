@@ -127,3 +127,13 @@ Use this template:
 **Why:** Persistence and honest stale/unknown states are the minimum useful full-stack milestone, without requiring a paid hosted database or sign-in.
 
 **Limitations:** Client IP rate limiting is lightweight and shared-IP users can collide behind a proxy. A public launch will require secure deployment, database backups, anti-abuse measures, and student validation. GPS and walking-time estimation are deferred; external Google Maps directions remain.
+
+## 2026-10-29 — Opt-in location-based discovery
+
+**Status:** Implemented in frontend, pending on-phone review.
+
+**Decision:** Add one compact “From” selector shared by List and Map. Allow an explicit browser GPS request or choosing a known UBC building manually. All distance calculations happen client-side via the haversine formula, are rounded for display, and are clearly labelled **straight-line distance**, not walking minutes. Closest is activated only after a starting point is chosen. Show a small separate starting-point marker on the map, leaving busyness markers unchanged. Continue opening Google Maps for actual walking routes.
+
+**Privacy:** Keep the origin in React memory only; do not persist the coordinate to browser storage, API, SQLite, or logs.
+
+**Limitations:** Phone geolocation typically requires HTTPS (not a LAN HTTP address). Approximate building coordinates are not precise study-zone entrances. GPS inaccuracy can change ranks over short distances.

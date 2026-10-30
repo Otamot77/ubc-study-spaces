@@ -1,15 +1,17 @@
-import { Compass, Footprints, Info, List, Map as MapIcon, MapPin, MessageCirclePlus, Navigation, ExternalLink } from 'lucide-react'
+import { ChevronDown, Compass, Info, List, Map as MapIcon, MapPin, MessageCirclePlus, Navigation, ExternalLink } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { BottomSheet } from './components/BottomSheet'
 import { BusynessIndicator } from './components/BusynessIndicator'
 import { MapView } from './components/MapView'
+import { LocationPicker } from './components/LocationPicker'
 import { ReportPreview } from './components/ReportPreview'
 import { StudySpaceCard } from './components/StudySpaceCard'
 import { directionsUrl, sortStudySpaces } from './lib/sortStudySpaces'
-import type { SortMode, StudySpace } from './types'
+import { formatDistance, withDistances } from './lib/distance'
+import type { SortMode, StartingPoint, StudySpace } from './types'
 
 type ViewMode = 'list' | 'map'
-type SheetMode = 'details' | 'report' | null
+type SheetMode = 'details' | 'report' | 'location' | null
 
 const sortOptions: { id: SortMode; label: string }[] = [
   { id: 'recommended', label: 'Recommended' },
@@ -22,6 +24,10 @@ export default function App() {
   const [sort, setSort] = useState<SortMode>('recommended')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [sheet, setSheet] = useState<SheetMode>(null)
+  const [startingPoint, setStartingPoint] = useState<StartingPoint | null>(null)
+  const [locating, setLocating] = useState(false)
+  const [locationError, setLocationError] = useState<string | null>(null)
+  const gpsAttempt = useRef(0)
   const [sourceSpaces, setSourceSpaces] = useState<StudySpace[]>([])
   const [loading, setLoading] = useState(true)
   const [apiError, setApiError] = useState<string | null>(null)
@@ -54,9 +60,76 @@ export default function App() {
     return () => { active = false; window.clearInterval(interval) }
   }, [refreshToken])
 
-  const spaces = useMemo(() => sortStudySpaces(sourceSpaces, sort), [sourceSpaces, sort])
+  const locatedSpaces = useMemo(
+    () => withDistances(sourceSpaces, startingPoint),
+    [sourceSpaces, startingPoint],
+  )
+  const spaces = useMemo(() => sortStudySpaces(locatedSpaces, sort), [locatedSpaces, sort])
   const selectedSpace = spaces.find((space) => space.id === selectedId) ?? spaces[0]
-  const closestAvailable = sourceSpaces.some((space) => space.walkingMinutes !== null)
+
+  function openLocationPicker() {
+    setLocationError(null)
+    setSheet('location')
+  }
+
+  function chooseStartingPoint(space: StudySpace) {
+    gpsAttempt.current += 1 // Ignore an older browser GPS callback.
+    setLocating(false)
+    setLocationError(null)
+    setStartingPoint({ source: 'manual', label: space.name, coordinates: space.coordinates })
+    setSort('closest')
+    setSheet(null)
+  }
+
+  function clearStartingPoint() {
+    gpsAttempt.current += 1
+    setLocating(false)
+    setStartingPoint(null)
+    setSort('recommended')
+    setLocationError(null)
+    setSheet(null)
+  }
+
+  function useGps() {
+    if (!window.isSecureContext || !navigator.geolocation) {
+      setLocationError('GPS needs HTTPS on phones. For local Wi-Fi testing, choose a campus building below.')
+      return
+    }
+
+    const attempt = ++gpsAttempt.current
+    setLocating(true)
+    setLocationError(null)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        if (attempt !== gpsAttempt.current) return
+        setLocating(false)
+        const { latitude, longitude, accuracy } = position.coords
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+          setLocationError('Your browser returned an invalid position. Choose a campus building instead.')
+          return
+        }
+        setStartingPoint({
+          source: 'gps',
+          label: 'My location',
+          coordinates: { lat: latitude, lng: longitude },
+          accuracyMeters: Number.isFinite(accuracy) ? Math.round(accuracy) : undefined,
+        })
+        setSort('closest')
+        setSheet(null)
+      },
+      (error) => {
+        if (attempt !== gpsAttempt.current) return
+        setLocating(false)
+        const message = error.code === 1
+          ? 'Location permission was denied. Choose a campus building instead.'
+          : error.code === 3
+            ? 'Could not determine your location in time. Try again or choose a building.'
+            : 'Your position is unavailable. Choose a campus building instead.'
+        setLocationError(message)
+      },
+      { enableHighAccuracy: false, maximumAge: 60_000, timeout: 12_000 },
+    )
+  }
 
   function showDetails(space: StudySpace) {
     setSelectedId(space.id)
@@ -108,24 +181,39 @@ export default function App() {
             </button>
           </div>
         </div>
+        <button
+          type="button"
+          className="toolbar__origin"
+          onClick={openLocationPicker}
+          aria-label={startingPoint ? `Change starting point: ${startingPoint.label}` : 'Choose your starting point'}
+          aria-haspopup="dialog"
+        >
+          <MapPin size={16} aria-hidden="true" />
+          <span className="toolbar__origin-text">
+            <span className="toolbar__origin-prefix">From</span>
+            <strong>{startingPoint?.label ?? 'Choose starting point'}</strong>
+          </span>
+          <ChevronDown size={16} aria-hidden="true" />
+        </button>
         {view === 'list' && (
           <div className="sort-buttons" role="group" aria-label="Sort study spaces">
             {sortOptions.map((option) => {
-              const disabled = option.id === 'closest' && !closestAvailable
               return (
                 <button
                   key={option.id}
                   type="button"
                   className={'sort-button' + (sort === option.id ? ' sort-button--active' : '')}
                   aria-pressed={sort === option.id}
-                  disabled={disabled}
-                  title={disabled ? 'Closest requires location-based walking times, coming later' : undefined}
                   onClick={() => {
+                    if (option.id === 'closest' && !startingPoint) {
+                      openLocationPicker()
+                      return
+                    }
                     setSort(option.id)
                     listRef.current?.scrollTo({ top: 0, behavior: 'auto' })
                   }}
                 >
-                  {disabled ? 'Closest · Soon' : option.label}
+                  {option.label}
                 </button>
               )
             })}
@@ -137,7 +225,7 @@ export default function App() {
         <div className="list-scroller" ref={listRef} hidden={view !== 'list'}>
           <p className="demo-notice" role="note">
             <Info size={16} aria-hidden="true" />
-            Busyness is based on anonymous recent reports, not verified seat counts. No reports means Unknown.
+            Busyness comes from unverified recent reports. {startingPoint ? 'Distances are approximate straight-line, not walking routes.' : 'Choose a starting point to find the closest space.'}
           </p>
           {loading && <p className="api-state" role="status">Loading study spaces…</p>}
           {apiError && (
@@ -162,7 +250,7 @@ export default function App() {
                   />
                 ))}
               </section>
-              <p className="list-end">All {spaces.length} campus buildings shown · No live walking-time estimates yet</p>
+              <p className="list-end">All {spaces.length} campus buildings shown · Google Maps handles walking routes</p>
             </>
           )}
         </div>
@@ -171,7 +259,8 @@ export default function App() {
             {apiError || loading || !sourceSpaces.length
               ? <div className="map-unavailable" role="status">{loading ? 'Loading map locations…' : apiError || 'No locations available.'}</div>
               : <MapView
-                  spaces={sourceSpaces}
+                  spaces={locatedSpaces}
+                  origin={startingPoint}
                   selected={selectedId ? selectedSpace ?? null : null}
                   selectedId={selectedId}
                   onSelect={setSelectedId}
@@ -198,9 +287,7 @@ export default function App() {
             <div className="details-sheet__facts">
               <BusynessIndicator busyness={selectedSpace.busyness} />
               <span className="walking-time">
-                {selectedSpace.walkingMinutes === null
-                  ? <><MapPin size={16} aria-hidden="true" /> UBC campus</>
-                  : <><Footprints size={16} aria-hidden="true" /> {selectedSpace.walkingMinutes} min walk</>}
+                <><MapPin size={16} aria-hidden="true" /> {selectedSpace.distanceMeters === null ? 'UBC campus' : formatDistance(selectedSpace.distanceMeters)}</>
               </span>
             </div>
             <p className="detail-freshness">
@@ -208,7 +295,7 @@ export default function App() {
                 ? `${selectedSpace.recentReportCount} recent reports · Latest ${selectedSpace.latestReportMinutesAgo} min ago · ${selectedSpace.confidence} confidence`
                 : 'No recent reports'}
             </p>
-            <p className="sheet-note">Reports expire from the estimate after 45 minutes. These are unverified observations, not confirmed seat counts.</p>
+            <p className="sheet-note">Reports expire after 45 minutes. Occupancy is unverified. {selectedSpace.distanceMeters !== null && 'Distances are straight-line estimates, not walking distances.'}</p>
             <a href={directionsUrl(selectedSpace)} className="action action--primary" target="_blank" rel="noopener noreferrer">
               <Navigation size={18} aria-hidden="true" /> Get directions <ExternalLink size={15} aria-hidden="true" />
             </a>
@@ -216,6 +303,20 @@ export default function App() {
               <MessageCirclePlus size={18} aria-hidden="true" /> Report busyness
             </button>
           </div>
+        </BottomSheet>
+      )}
+
+      {sheet === 'location' && (
+        <BottomSheet key="location" title="Starting point" onClose={() => setSheet(null)}>
+          <LocationPicker
+            spaces={locatedSpaces}
+            origin={startingPoint}
+            locating={locating}
+            error={locationError}
+            onUseGps={useGps}
+            onChoose={chooseStartingPoint}
+            onClear={clearStartingPoint}
+          />
         </BottomSheet>
       )}
 

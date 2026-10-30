@@ -16,8 +16,8 @@ This is a working plan, not a fixed commitment. Each milestone should produce a 
 
 ## 2. Location and map
 - [ ] Curate and verify a small UBC study-zone dataset
-- [ ] Ask for location permission only when useful; manual fallback
-- [ ] Distance sorting using real position (mock sorting exists)
+- [x] Explicit permission request for browser GPS (secure context only); manual campus-building fallback
+- [x] Client-side straight-line distance sorting from GPS or manual starting point
 - [x] Real interactive map with sourced building-level pins and selection sync
 - [ ] Real walking-time estimates (later; first prototype uses Google Maps for external navigation)
 - [x] Google Maps external directions (first prototype)
@@ -45,3 +45,12 @@ This is a working plan, not a fixed commitment. Each milestone should produce a 
 - [ ] Expand study zones
 
 **Milestone rule:** Don't claim a feature is completed until it is implemented and tested.
+
+## 2026-10-29 — Location discovery implementation
+
+- [x] Choose any known campus building as the starting point
+- [x] Explicit browser geolocation button and actionable permission/HTTPS errors
+- [x] Client-only geodesic distances, Closest sorting, list/detail/map distance labels
+- [x] Starting-point indicator on the map (without resetting pan/zoom)
+- [ ] Verify GPS behavior on an HTTPS phone deployment
+- [ ] Optional pedestrian routing travel times (not needed for this prototype)
