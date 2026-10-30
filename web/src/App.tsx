@@ -1,6 +1,7 @@
 import { ChevronDown, Compass, Info, List, Map as MapIcon, MapPin, MessageCirclePlus, Navigation, ExternalLink } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { BottomSheet } from './components/BottomSheet'
+import { ExploreFilters } from './components/ExploreFilters'
 import { BusynessIndicator } from './components/BusynessIndicator'
 import { MapView } from './components/MapView'
 import { LocationPicker } from './components/LocationPicker'
@@ -8,6 +9,8 @@ import { ReportPreview } from './components/ReportPreview'
 import { StudySpaceCard } from './components/StudySpaceCard'
 import { directionsUrl, sortStudySpaces } from './lib/sortStudySpaces'
 import { formatDistance, withDistances } from './lib/distance'
+import { filterExploreSpaces } from './lib/filterExploreSpaces'
+import type { AvailabilityFilter } from './lib/filterExploreSpaces'
 import type { SortMode, StartingPoint, StudySpace } from './types'
 
 type ViewMode = 'list' | 'map'
@@ -22,6 +25,8 @@ const sortOptions: { id: SortMode; label: string }[] = [
 export default function App() {
   const [view, setView] = useState<ViewMode>('list')
   const [sort, setSort] = useState<SortMode>('recommended')
+  const [exploreQuery, setExploreQuery] = useState('')
+  const [availabilityFilter, setAvailabilityFilter] = useState<AvailabilityFilter>('all')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [sheet, setSheet] = useState<SheetMode>(null)
   const [startingPoint, setStartingPoint] = useState<StartingPoint | null>(null)
@@ -72,6 +77,11 @@ export default function App() {
     [sourceSpaces, startingPoint],
   )
   const spaces = useMemo(() => sortStudySpaces(locatedSpaces, sort), [locatedSpaces, sort])
+  const visibleSpaces = useMemo(
+    () => filterExploreSpaces(spaces, exploreQuery, availabilityFilter),
+    [spaces, exploreQuery, availabilityFilter],
+  )
+  // Reports and details must always reference the full catalog, not search results.
   const selectedSpace = spaces.find((space) => space.id === selectedId) ?? spaces[0]
 
   function openLocationPicker() {
@@ -243,21 +253,41 @@ export default function App() {
           )}
           {!loading && !apiError && (
             <>
+              <ExploreFilters
+                query={exploreQuery}
+                status={availabilityFilter}
+                onQueryChange={setExploreQuery}
+                onStatusChange={setAvailabilityFilter}
+              />
               <div className="list-title">
                 <h2>Study spaces</h2>
-                <span>{spaces.length} locations</span>
+                <span>{visibleSpaces.length} of {spaces.length}</span>
               </div>
-              <section className="space-list" aria-label="Study spaces">
-                {spaces.map((space) => (
-                  <StudySpaceCard
-                    key={space.id}
-                    space={space}
-                    selected={selectedId === space.id}
-                    onSelect={() => showDetails(space)}
-                  />
-                ))}
-              </section>
-              <p className="list-end">All {spaces.length} campus study locations shown · Google Maps handles walking routes</p>
+              {visibleSpaces.length ? (
+                <section className="space-list" aria-label="Study spaces">
+                  {visibleSpaces.map((space) => (
+                    <StudySpaceCard
+                      key={space.id}
+                      space={space}
+                      selected={selectedId === space.id}
+                      onSelect={() => showDetails(space)}
+                    />
+                  ))}
+                </section>
+              ) : (
+                <div className="explore-filters__empty" role="status">
+                  <strong>No spaces match those filters.</strong>
+                  <p>Try another name or reported status. A lack of recent reports means Unknown, not available.</p>
+                  <button
+                    type="button"
+                    className="action action--secondary"
+                    onClick={() => { setExploreQuery(''); setAvailabilityFilter('all') }}
+                  >
+                    Clear filters
+                  </button>
+                </div>
+              )}
+              <p className="list-end">{visibleSpaces.length === spaces.length ? 'All' : 'Showing'} {visibleSpaces.length} campus study locations · Google Maps handles walking routes</p>
             </>
           )}
         </div>
