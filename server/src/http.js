@@ -1,5 +1,5 @@
 import { createServer } from 'node:http'
-import { addReport, occupancy, WINDOW_MS } from './db.js'
+import { addReport, correctReport, occupancy, WINDOW_MS, CORRECTION_MS } from './db.js'
 import { spaceIds, spaces } from './spaces.js'
 
 const VALID_LEVELS = new Set(['low', 'moderate', 'high'])
@@ -99,10 +99,33 @@ export function makeServer({ db, clock = () => Date.now(), limiter = createRateL
         if (!limiter(ip, spaceId, now)) {
           return json(res, 429, { error: 'Too many reports. Try again shortly.' }, { 'Retry-After': '30' })
         }
-        addReport(db, spaceId, body.level, now)
-        return json(res, 201, { saved: true, spaceId, ...occupancy(db, spaceId, now) })
+        const { reportId, editToken } = addReport(db, spaceId, body.level, now)
+        return json(res, 201, {
+          saved: true, spaceId, reportId, editToken,
+          editableUntil: new Date(now + CORRECTION_MS).toISOString(),
+          ...occupancy(db, spaceId, now),
+        })
       }
-      if (!['GET', 'POST'].includes(req.method)) return json(res, 405, { error: 'Method not allowed' }, { Allow: 'GET, POST' })
+      const correctionMatch = /^\/api\/spaces\/([a-z0-9-]+)\/reports\/([1-9][0-9]*)$/.exec(pathname)
+      if (req.method === 'PATCH' && correctionMatch) {
+        const [, spaceId, reportIdText] = correctionMatch
+        const reportId = Number(reportIdText)
+        if (!spaceIds.has(spaceId) || !Number.isSafeInteger(reportId)) {
+          return json(res, 404, { error: 'Report not found' })
+        }
+        const body = await readJson(req)
+        if (!body || typeof body !== 'object' || Array.isArray(body) ||
+            Object.keys(body).length !== 2 || !VALID_LEVELS.has(body.level) ||
+            typeof body.editToken !== 'string') {
+          return json(res, 400, { error: 'Expected a valid level and edit token' })
+        }
+        const now = clock()
+        if (!correctReport(db, spaceId, reportId, body.editToken, body.level, now)) {
+          return json(res, 409, { error: 'Could not change this report. The correction window may have expired.' })
+        }
+        return json(res, 200, { saved: true, corrected: true, spaceId, reportId, ...occupancy(db, spaceId, now) })
+      }
+      if (!['GET', 'POST', 'PATCH'].includes(req.method)) return json(res, 405, { error: 'Method not allowed' }, { Allow: 'GET, POST, PATCH' })
       return json(res, 404, { error: 'Not found' })
     } catch (err) {
       if (err.status) return json(res, err.status, { error: err.message })

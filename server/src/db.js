@@ -1,9 +1,11 @@
 import { DatabaseSync } from 'node:sqlite'
+import { createHash, randomBytes } from 'node:crypto'
 import { mkdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 export const WINDOW_MS = 45 * 60_000
+export const CORRECTION_MS = 2 * 60_000
 const DEFAULT_PATH = fileURLToPath(new URL('../data/study-spaces.sqlite', import.meta.url))
 const VALID_LEVELS = new Set(['low', 'moderate', 'high'])
 
@@ -22,12 +24,46 @@ export function openDatabase(path = process.env.STUDY_SPACES_DB_PATH || DEFAULT_
     CREATE INDEX IF NOT EXISTS idx_reports_space_time
       ON reports(space_id, created_at DESC);
   `)
+  // Backward-compatible migration for laptops with reports from the first API version.
+  const columns = db.prepare('PRAGMA table_info(reports)').all()
+  if (!columns.some((col) => col.name === 'edit_token_hash')) {
+    db.exec('ALTER TABLE reports ADD COLUMN edit_token_hash TEXT')
+  }
+  if (!columns.some((col) => col.name === 'edit_count')) {
+    db.exec('ALTER TABLE reports ADD COLUMN edit_count INTEGER NOT NULL DEFAULT 0')
+  }
   return db
+}
+
+function tokenHash(token) {
+  return createHash('sha256').update(token).digest('hex')
 }
 
 export function addReport(db, spaceId, level, now = Date.now()) {
   if (!VALID_LEVELS.has(level)) throw new TypeError('Invalid report level')
-  db.prepare('INSERT INTO reports(space_id, level, created_at) VALUES (?, ?, ?)').run(spaceId, level, now)
+  const editToken = randomBytes(32).toString('base64url')
+  const result = db.prepare(
+    'INSERT INTO reports(space_id, level, created_at, edit_token_hash) VALUES (?, ?, ?, ?)'
+  ).run(spaceId, level, now, tokenHash(editToken))
+  return { reportId: Number(result.lastInsertRowid), editToken }
+}
+
+/**
+ * A bearer edit token may change only its own report, no later than two
+ * minutes after submission. Corrections keep the original timestamp and
+ * count as the same vote; they do not extend report freshness.
+ */
+export function correctReport(db, spaceId, reportId, editToken, level, now = Date.now()) {
+  if (!VALID_LEVELS.has(level)) throw new TypeError('Invalid report level')
+  if (!Number.isSafeInteger(reportId) || reportId < 1) return false
+  if (typeof editToken !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(editToken)) return false
+  const result = db.prepare(`
+    UPDATE reports
+    SET level = ?, edit_count = edit_count + 1
+    WHERE id = ? AND space_id = ? AND edit_token_hash = ?
+      AND created_at >= ? AND created_at <= ? AND edit_count < 5
+  `).run(level, reportId, spaceId, tokenHash(editToken), now - CORRECTION_MS, now)
+  return result.changes === 1
 }
 
 export function occupancy(db, spaceId, now = Date.now()) {
