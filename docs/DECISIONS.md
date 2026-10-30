@@ -157,3 +157,13 @@ Use this template:
 **Why:** A one-origin HTTPS host supports browser GPS on phones, and keeps the MVP full stack simple without a premature database rewrite. Railway is a candidate with GitHub Docker builds and volume support. The user will explicitly authorize account connection and any charge before deployment.
 
 **Risks:** Shared invite code is limited abuse protection, not individual identity. Current IP cooldown uses the socket's remote address and can cause collisions behind the hosting proxy. Volume backups and recovery tests are mandatory for a pilot; the implementation is not ready for unrestricted public usage.
+
+## 2026-10-29 — Curate verified UBC study-space catalogue
+
+**Status:** Implemented and covered by API/build tests; site-access verification remains before an actual campus pilot.
+
+**Decision:** Expand from eight broad building pins to 13 curated study locations: add Law, Asian and X̱wi7x̱wa libraries, Hennings second-floor hallways and EDC informal study areas. Correct the former Education Library name to **Education Learning Commons** while retaining its original `education` report ID. Show addresses, verified study-zone notes, source links and official Library hours links in Details, without claiming live open status. Preserve ICICS with an explicit warning that drop-in study seating is not confirmed; Education access also requires a new 2026–27 check.
+
+**Why:** Useful geographic discovery depends more on trustworthy location data than on decorative UI or unverified amenities. Full source audit: [STUDY_SPACE_DATA.md](STUDY_SPACE_DATA.md).
+
+**Next validation:** On-site check of public entrances and Scarfe/ICICS access; inspect long venue names on phone; do not add noise/outlet filters until consistently verified.

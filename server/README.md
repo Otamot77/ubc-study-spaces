@@ -16,7 +16,7 @@ The SQLite database is created automatically at `server/data/study-spaces.sqlite
 ## Endpoints
 
 - `GET /api/health` — service health
-- `GET /api/spaces` — eight real, approximate building locations and their aggregated recent reports
+- `GET /api/spaces` — 13 curated UBC study locations and their aggregated recent reports
 - `POST /api/spaces/:id/reports` — JSON `{"level":"low"|"moderate"|"high"}`; returns 201 and a one-time report ID + private edit token
 - `PATCH /api/spaces/:id/reports/:reportId` — JSON `{"level":"low"|"moderate"|"high"|null,"editToken":"..."}` to update or revoke the **same report** for two minutes after submission (maximum five changes); 200 on success, 409 if authorization fails or the window expires
 

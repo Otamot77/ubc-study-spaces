@@ -4,7 +4,7 @@ A mobile-first study-space finder for students at UBC Vancouver.
 
 **Core question:** Where can I find a good study spot right now?
 
-The React frontend and Node.js/SQLite reporting API now form a **working local prototype**. Students can select a building, submit a one-tap crowding report, and see its status update in the list and map. Reports persist across API restarts and age out after 45 minutes. With no recent reports, the status is always **Unknown**.
+The React frontend and Node.js/SQLite reporting API now form a **working local prototype** with 13 curated UBC locations. Students can select a building, submit a one-tap crowding report, and see its status update in the list and map. Reports persist across API restarts and age out after 45 minutes. With no recent reports, the status is always **Unknown**.
 
 ## Run it locally
 
@@ -44,6 +44,7 @@ See [frontend instructions](web/README.md), [API instructions](server/README.md)
 
 - [Product vision](docs/PRODUCT.md)
 - [Map data sources](docs/MAP_DATA.md)
+- [Verified study-space research and access caveats](docs/STUDY_SPACE_DATA.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Decision log](docs/DECISIONS.md)
 

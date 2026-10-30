@@ -1,6 +1,6 @@
 // Curated UBC Vancouver study-space locations, reviewed 2026-10-29.
 // Coordinates refer to APPROXIMATE building centres, not entrances or individual seats.
-// Source and access caveats are documented at docs/STUDY_SPACE_DATA.md.
+// Source and access caveats are documented at ../../docs/STUDY_SPACE_DATA.md.
 // IDs of existing places are deliberately stable to preserve reports in SQLite.
 const HOURS = 'https://hours.library.ubc.ca/'
 const LIBRARY_MAP = 'https://wiki.prod.apps.ctlt.ubc.ca/Library'
@@ -46,10 +46,10 @@ export const spaces = Object.freeze([
     id: 'life', name: 'Life Building',
     coordinates: { lat: 49.267471, lng: -123.249975 },
     recommendedRank: 5, directionsQuery: 'UBC Life Building, Vancouver',
-    category: 'informal', verification: 'check-access',
+    category: 'informal', verification: 'confirmed',
     address: '6138 Student Union Boulevard',
-    studyNotes: 'A busy student-services and social building with some informal seating. Specific quiet study areas and availability have not been independently confirmed.',
-    sourceUrl: 'https://www.grad.ubc.ca/campus-commmunity/blog/bizarre-best-places-study-grad-students-tier-list',
+    studyNotes: 'UBC Student Services lists studying as an activity here, alongside food and student services. Individual seating zones are not mapped separately.',
+    sourceUrl: 'https://students.ubc.ca/about-student-services/ubc-life-building/',
   },
   {
     id: 'icics', name: 'ICICS / CS Building',
@@ -84,7 +84,7 @@ export const spaces = Object.freeze([
     recommendedRank: 9, directionsQuery: 'Law Library, Allard Hall, 1822 East Mall, UBC Vancouver',
     category: 'library', verification: 'confirmed',
     address: 'Allard Hall, 1822 East Mall',
-    studyNotes: 'UBC Law Library in Allard Hall, with library study seating on multiple levels.',
+    studyNotes: 'UBC Law Library in Allard Hall. Some tables and carrels may be reserved for law students during exam periods.',
     sourceUrl: 'https://law.library.ubc.ca/', hoursUrl: HOURS,
   },
   {
