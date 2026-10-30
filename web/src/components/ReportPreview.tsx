@@ -1,7 +1,7 @@
 import { CheckCircle2, Info, LoaderCircle } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { ReportLocationPicker } from './ReportLocationPicker'
-import { buildReportRequest, correctionAllowed } from '../lib/reportFlow'
+import { buildReportRequest, correctionAllowed, nextReportLevel } from '../lib/reportFlow'
 import type { ReportLevel, SavedReport } from '../lib/reportFlow'
 import type { StudySpace } from '../types'
 
@@ -35,19 +35,20 @@ export function ReportPreview({ spaces, selected, onSelect, onSuccess }: Props) 
   }, [selected.id])
 
   async function submit(level: ReportLevel) {
-    if (requestInFlight.current || correctionExpired || savedReport?.level === level) return
+    if (requestInFlight.current || correctionExpired) return
     if (savedReport && !correctionAllowed(savedReport)) {
       setCorrectionExpired(true)
       setError('This report can no longer be changed. Close and reopen Report to submit a new observation later.')
       return
     }
 
+    const nextLevel = nextReportLevel(savedReport, level)
     requestInFlight.current = true
     setPendingLevel(level)
     setSubmitting(true)
     setError(null)
     try {
-      const request = buildReportRequest(selected.id, level, savedReport)
+      const request = buildReportRequest(selected.id, nextLevel, savedReport)
       const response = await fetch(request.url, {
         method: request.method,
         headers: { 'Content-Type': 'application/json' },
@@ -65,7 +66,7 @@ export function ReportPreview({ spaces, selected, onSelect, onSuccess }: Props) 
       }
 
       if (savedReport) {
-        setSavedReport({ ...savedReport, level })
+        setSavedReport({ ...savedReport, level: nextLevel })
       } else if (data && typeof data.reportId === 'number' && Number.isSafeInteger(data.reportId) &&
                  typeof data.editToken === 'string' && typeof data.editableUntil === 'string' &&
                  Number.isFinite(Date.parse(data.editableUntil))) {
@@ -90,8 +91,11 @@ export function ReportPreview({ spaces, selected, onSelect, onSuccess }: Props) 
     }
   }
 
-  const highlighted = pendingLevel ?? savedReport?.level ?? null
-  const savedSuccessfully = savedReport !== null
+  // Keep the server-confirmed choice highlighted while a change is in flight.
+  // An unsuccessful request must never look like it was saved.
+  const highlighted = savedReport?.level ?? null
+  const savedSuccessfully = highlighted !== null
+  const hasReportToken = savedReport !== null
 
   return (
     <div className="report-sheet">
@@ -102,12 +106,12 @@ export function ReportPreview({ spaces, selected, onSelect, onSuccess }: Props) 
         onSelect={onSelect}
       />
       <p className="field-label report-question">How busy is it right now?</p>
-      <div className="report-options" role="group" aria-label="Report busyness; tap a different answer to correct a saved report">
+      <div className="report-options" role="group" aria-label="Report busyness; tap the selected answer again to undo it">
         {options.map((option) => (
           <button
             key={option.id}
             type="button"
-            className={'report-choice' + (highlighted === option.id ? ' report-choice--active' : '')}
+            className={'report-choice' + (highlighted === option.id || (submitting && pendingLevel === option.id) ? ' report-choice--active' : '')}
             aria-pressed={highlighted === option.id}
             disabled={submitting || correctionExpired}
             onClick={() => { void submit(option.id) }}
@@ -135,10 +139,12 @@ export function ReportPreview({ spaces, selected, onSelect, onSuccess }: Props) 
         {error
           ? error
           : submitting
-            ? savedSuccessfully ? 'Updating your report…' : 'Saving your report…'
+            ? hasReportToken ? 'Updating your report…' : 'Saving your report…'
             : savedSuccessfully
-              ? 'Saved! Tap a different option to correct your answer within 2 minutes. No duplicate report will be added.'
-              : 'Tap an option to submit. Only report what you see in person.'}
+              ? 'Saved! Tap the selected option again to undo, or another option to correct it within 2 minutes.'
+              : hasReportToken
+                ? 'Selection removed — your vote is no longer counted. Tap an option to report again within 2 minutes.'
+                : 'Tap an option to submit. Only report what you see in person.'}
       </p>
     </div>
   )

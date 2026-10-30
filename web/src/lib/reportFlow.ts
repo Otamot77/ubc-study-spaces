@@ -5,14 +5,20 @@ export interface SavedReport {
   reportId: number
   editToken: string
   editableUntil: number
-  level: ReportLevel
+  level: ReportLevel | null
 }
 
 export function correctionAllowed(report: SavedReport, now = Date.now()): boolean {
   return now <= report.editableUntil
 }
 
-export function buildReportRequest(spaceId: string, level: ReportLevel, saved: SavedReport | null) {
+/** Tapping an already-saved choice toggles it off rather than posting another vote. */
+export function nextReportLevel(saved: SavedReport | null, tapped: ReportLevel): ReportLevel | null {
+  return saved?.level === tapped ? null : tapped
+}
+
+export function buildReportRequest(spaceId: string, level: ReportLevel | null, saved: SavedReport | null) {
+  if (saved === null && level === null) throw new Error('Cannot undo an unsaved report')
   const endpoint = '/api/spaces/' + encodeURIComponent(spaceId) + '/reports'
   return saved
     ? {
