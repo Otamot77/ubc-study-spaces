@@ -36,9 +36,9 @@ cd ../web && npm run build && npm test
 
 ## Limits
 
-This remains a **local proof of concept**, not a public occupancy service or a deployed PWA. Building positions are approximate; crowdsourced occupancy is unverified. Walking-time estimates, personalization, production security/abuse prevention and hosted database are not implemented yet. Google Maps handles directions externally.
+This remains a **local proof of concept**, not a public occupancy service or a deployed PWA. A Docker-based controlled-beta deployment is now prepared, but not deployed. Building positions are approximate; crowdsourced occupancy is unverified. Walking-time estimates, personalization, production security/abuse prevention and hosted database are not implemented yet. Google Maps handles directions externally.
 
-See [frontend instructions](web/README.md), [API instructions](server/README.md), and [development roadmap](docs/ROADMAP.md).
+See [frontend instructions](web/README.md), [API instructions](server/README.md), [deployment instructions](docs/DEPLOYMENT.md), and [development roadmap](docs/ROADMAP.md).
 
 ## Documentation
 
@@ -46,3 +46,7 @@ See [frontend instructions](web/README.md), [API instructions](server/README.md)
 - [Map data sources](docs/MAP_DATA.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Decision log](docs/DECISIONS.md)
+
+## HTTPS pilot preparation
+
+A single Dockerfile now serves the frontend and API on one origin, with optional beta-code-protected reporting and a required persistent SQLite volume in production. [Deployment instructions](docs/DEPLOYMENT.md) explain how to connect hosting and conduct a controlled phone pilot; nothing has been published yet.

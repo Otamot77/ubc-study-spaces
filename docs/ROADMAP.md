@@ -54,3 +54,13 @@ This is a working plan, not a fixed commitment. Each milestone should produce a 
 - [x] Starting-point indicator on the map (without resetting pan/zoom)
 - [ ] Verify GPS behavior on an HTTPS phone deployment
 - [ ] Optional pedestrian routing travel times (not needed for this prototype)
+
+## 2026-10-29 — HTTPS beta preparation
+
+- [x] Multi-stage Docker build with frontend and reporting API on one origin
+- [x] Fail-closed production settings for a persistent SQLite path and invite-only writes
+- [x] Health endpoint and automated Docker smoke test
+- [x] Frontend beta access-code prompt only when hosted API requires one
+- [ ] Connect a hosting account and provision a persistent volume and backups
+- [ ] Launch HTTPS URL and conduct a small permissioned phone pilot
+- [ ] Harden production proxy-aware spam prevention and reporter verification

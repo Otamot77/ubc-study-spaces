@@ -459,3 +459,16 @@ button:focus-visible, a:focus-visible, select:focus-visible {
   margin: 0; padding: 19px 12px; text-align: center;
   font-size: 12px; color: #8793a0; line-height: 1.5;
 }
+
+/* Optional invite code appears only on an HTTPS hosted beta with protected writes. */
+.report-beta { display: grid; gap: 7px; margin-top: 14px; }
+.report-beta__input {
+  width: 100%; min-height: 44px; padding: 10px 12px;
+  color: #253342; background: #f7f9fb;
+  border: 1px solid #dfe5eb; border-radius: 11px;
+  font-size: 14px;
+}
+.report-beta__input:focus-visible {
+  border-color: #809dbb; outline: 3px solid #b5cee854; outline-offset: 1px;
+}
+.report-beta__hint { margin: 0; font-size: 11px; line-height: 1.4; color: #8793a0; }

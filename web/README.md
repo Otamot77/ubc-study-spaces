@@ -43,6 +43,7 @@ npm run preview
 - Map camera button: recenter on the chosen GPS/manual starting point; when none is set, the button opens the location picker
 - Closest sorts by approximate **straight-line geographic distance**; list, detail, and map preview show distance in metres/km
 - Your starting point stays in browser memory, never sent to the report API or stored in SQLite
+- Hosted pilot writes use a private invite code entered in the report sheet; local development reporting works as before
 - External Google Maps walking-directions links
 
 ## Honest limits
@@ -58,3 +59,7 @@ The map uses low-contrast OpenStreetMap tiles with attribution; follow [OSMF til
 Manual campus starting points work over the existing local Wi-Fi HTTP Vite URL. Browser GPS usually requires **HTTPS** on phones; `http://localhost` is a special secure-context exception on the laptop, not on a phone browsing your laptop's IP. The app does not automatically request permission. If GPS is unavailable, the manual picker remains usable.
 
 Select **From → Choose starting point** or tap **Closest**, choose a building, and verify that the list reorders. On Map, the small blue marker shows your chosen starting point, separate from occupancy symbols. Clearing the origin removes distances and returns to Recommended. No reverse geocoding or route API is needed.
+
+## HTTPS pilot
+
+A production container serves the built frontend and API from one origin. If `GET /api/config` indicates an invite-only beta, the report sheet shows a password-style access-code input. The code is held only in the current app memory and sent as a request header for report writes. See [deployment guide](../docs/DEPLOYMENT.md). Browser GPS can be tested on an HTTPS hosted site; nothing has been deployed yet.

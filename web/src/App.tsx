@@ -29,6 +29,8 @@ export default function App() {
   const [locationError, setLocationError] = useState<string | null>(null)
   const gpsAttempt = useRef(0)
   const [sourceSpaces, setSourceSpaces] = useState<StudySpace[]>([])
+  const [requiresBetaCode, setRequiresBetaCode] = useState(false)
+  const [betaAccessCode, setBetaAccessCode] = useState('')
   const [loading, setLoading] = useState(true)
   const [apiError, setApiError] = useState<string | null>(null)
   const [refreshToken, setRefreshToken] = useState(0)
@@ -38,13 +40,18 @@ export default function App() {
     let active = true
     async function refresh() {
       try {
-        const response = await fetch('/api/spaces', { cache: 'no-store' })
-        if (!response.ok) throw new Error('Could not load study spaces')
+        const [response, configResponse] = await Promise.all([
+          fetch('/api/spaces', { cache: 'no-store' }),
+          fetch('/api/config', { cache: 'no-store' }),
+        ])
+        if (!response.ok || !configResponse.ok) throw new Error('Could not load study spaces')
         const data = await response.json() as { spaces?: StudySpace[] }
+        const config = await configResponse.json() as { betaAccessRequired?: boolean }
         if (!Array.isArray(data.spaces)) throw new Error('Invalid API response')
         if (!active) return
         setSourceSpaces((previous) =>
           JSON.stringify(previous) === JSON.stringify(data.spaces) ? previous : data.spaces!)
+        setRequiresBetaCode(config.betaAccessRequired === true)
         setApiError(null)
       } catch {
         if (!active) return
@@ -328,6 +335,9 @@ export default function App() {
             selected={selectedSpace}
             onSelect={setSelectedId}
             onSuccess={() => setRefreshToken((value) => value + 1)}
+            requiresBetaCode={requiresBetaCode}
+            betaAccessCode={betaAccessCode}
+            onBetaAccessCodeChange={setBetaAccessCode}
           />
         </BottomSheet>
       )}

@@ -29,3 +29,9 @@ After 45 minutes without recent reports, status becomes **unknown**. A two-way t
 This is a **local development prototype**, not a deploy-ready public reporting service. It does not authenticate students, confirm they are on campus, or guarantee accuracy. Cooldown is in-memory per network IP (30 seconds per space, 20 reports per hour). This is a light deterrent, not a security boundary; shared campus NATs could experience collisions and restarts reset cooldowns. Raw IP addresses are never written to the SQLite reports table.
 
 Use `npm test` for aggregation, TTL, validation, and HTTP integration tests. Protect public deployment with trusted proxy configuration, authenticators or abuse controls, HTTPS, and a production database/backup plan.
+
+## HTTPS pilot configuration
+
+On a production container, set `BETA_REPORT_CODE` (minimum 12 characters) and `STUDY_SPACES_DB_PATH` on a persistent volume. Production startup fails if either is missing. `GET /api/config` returns `{"betaAccessRequired":true}`. A protected `POST` or `PATCH` must include header `X-Study-Spaces-Access` with the invite code, or the API returns 403. The frontend asks pilot testers for this code only when the server requires it, and keeps it only in active app memory. It is **not** authentication suitable for public anonymous usage.
+
+The same Node process serves the compiled frontend under `STATIC_DIR` in production, allowing browser GPS over the host's HTTPS URL. `PORT` and `HOST` can be set by the platform. See [deployment guide](../docs/DEPLOYMENT.md).

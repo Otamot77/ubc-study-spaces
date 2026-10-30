@@ -10,6 +10,9 @@ interface Props {
   selected: StudySpace
   onSelect: (id: string) => void
   onSuccess: () => void
+  requiresBetaCode: boolean
+  betaAccessCode: string
+  onBetaAccessCodeChange: (value: string) => void
 }
 
 const options: { id: ReportLevel; label: string; detail: string }[] = [
@@ -18,7 +21,9 @@ const options: { id: ReportLevel; label: string; detail: string }[] = [
   { id: 'high', label: 'Almost full', detail: 'Very limited seating' },
 ]
 
-export function ReportPreview({ spaces, selected, onSelect, onSuccess }: Props) {
+export function ReportPreview({
+  spaces, selected, onSelect, onSuccess, requiresBetaCode, betaAccessCode, onBetaAccessCodeChange,
+}: Props) {
   const [pendingLevel, setPendingLevel] = useState<ReportLevel | null>(null)
   const [savedReport, setSavedReport] = useState<SavedReport | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -36,6 +41,10 @@ export function ReportPreview({ spaces, selected, onSelect, onSuccess }: Props) 
 
   async function submit(level: ReportLevel) {
     if (requestInFlight.current || correctionExpired) return
+    if (requiresBetaCode && betaAccessCode.trim().length === 0) {
+      setError('Enter your beta access code before submitting a report.')
+      return
+    }
     if (savedReport && !correctionAllowed(savedReport)) {
       setCorrectionExpired(true)
       setError('This report can no longer be changed. Close and reopen Report to submit a new observation later.')
@@ -51,7 +60,10 @@ export function ReportPreview({ spaces, selected, onSelect, onSuccess }: Props) 
       const request = buildReportRequest(selected.id, nextLevel, savedReport)
       const response = await fetch(request.url, {
         method: request.method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(requiresBetaCode ? { 'X-Study-Spaces-Access': betaAccessCode } : {}),
+        },
         body: request.body,
       })
       const data = await response.json().catch(() => null) as {
@@ -105,6 +117,22 @@ export function ReportPreview({ spaces, selected, onSelect, onSuccess }: Props) 
         disabled={submitting || savedSuccessfully || correctionExpired}
         onSelect={onSelect}
       />
+      {requiresBetaCode && (
+        <div className="report-beta">
+          <label htmlFor="report-beta-code" className="field-label">Beta access code</label>
+          <input
+            id="report-beta-code"
+            type="password"
+            autoComplete="off"
+            className="report-beta__input"
+            placeholder="Enter the pilot invite code"
+            value={betaAccessCode}
+            onChange={(event) => onBetaAccessCodeChange(event.target.value)}
+            disabled={submitting}
+          />
+          <p className="report-beta__hint">For pilot testers only. The code stays in this open tab.</p>
+        </div>
+      )}
       <p className="field-label report-question">How busy is it right now?</p>
       <div className="report-options" role="group" aria-label="Report busyness; tap the selected answer again to undo it">
         {options.map((option) => (

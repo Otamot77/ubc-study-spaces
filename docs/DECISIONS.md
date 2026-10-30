@@ -147,3 +147,13 @@ Use this template:
 **Why:** A growing list of buildings should not require long scrolling, and the map should let users quickly find their own origin again after exploring other pins.
 
 **Constraints:** Recenter does not refresh GPS or ask for location permission. It only uses the already-selected starting point. No coordinates or search terms are sent to the API.
+
+## 2026-10-29 — Prepare controlled HTTPS pilot without publishing
+
+**Status:** Implemented in repository; no public deployment yet.
+
+**Decision:** Use a single Docker container for Vite static assets and the existing Node/SQLite API. Production startup requires a persistent SQLite path and a private, minimum-length beta invite code. The browser fetches public beta configuration, then prompts testers for the code in the report sheet; anonymous reads remain public while writes require it. Keep the local development workflow unchanged.
+
+**Why:** A one-origin HTTPS host supports browser GPS on phones, and keeps the MVP full stack simple without a premature database rewrite. Railway is a candidate with GitHub Docker builds and volume support. The user will explicitly authorize account connection and any charge before deployment.
+
+**Risks:** Shared invite code is limited abuse protection, not individual identity. Current IP cooldown uses the socket's remote address and can cause collisions behind the hosting proxy. Volume backups and recovery tests are mandatory for a pilot; the implementation is not ready for unrestricted public usage.
