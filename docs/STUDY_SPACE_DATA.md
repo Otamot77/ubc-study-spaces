@@ -58,3 +58,8 @@ UBC Library officially writes this name **X̱wi7x̱wa Library**. The initial upp
 - UBC describes the name as meaning **“echo” in Sḵwx̱wú7mesh Sníchim (Squamish language)**.
 - The ASCII key `xwi7xwa` is retained **only as the stable database/report ID** and for forgiving search input. Search matching removes combining marks on temporary comparison strings but **never modifies the stored or displayed name**.
 - Avoid inventing a phonetic rendering: UBC Library provides official pronunciation resources and notes the need for care when presenting Indigenous names.
+
+## 2026-10-30 research recheck
+
+- **ICICS / CS Study Areas:** [UBC Computer Science's drop-in study-space page](https://www.cs.ubc.ca/students/undergrad/services/informal-learning-spaces) documents the atrium (first and second floors), study stairs near Pacific Poké and Demco Learning Centre (X150). The original `icics` report ID is retained. Some project rooms require booking and [lab/after-hours access has restrictions](https://www.cs.ubc.ca/students/undergrad/services/getting-started-guide). Status: study-space evidence **confirmed**; separate zone boundaries and entry times still need an on-site check.
+- **Education Learning Commons:** UBC's [2025–26 announcement](https://education.library.ubc.ca/blog/) and [Vancouver Academic Calendar](https://vancouver.calendar.ubc.ca/) describe a main-floor study space at Neville Scarfe. The latest explicit study-access statement we found specifies 2025–26. Status: study-purpose **confirmed**, 2026–27 operational access and opening hours **not yet confirmed**. No 'open now' claim is shown.

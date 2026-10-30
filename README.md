@@ -38,7 +38,7 @@ cd ../web && npm run build && npm test
 
 This remains a **local proof of concept**, not a public occupancy service or a deployed PWA. A Docker-based controlled-beta deployment is now prepared, but not deployed. Building positions are approximate; crowdsourced occupancy is unverified. Walking-time estimates, personalization, production security/abuse prevention and hosted database are not implemented yet. Google Maps handles directions externally.
 
-See [frontend instructions](web/README.md), [API instructions](server/README.md), [deployment instructions](docs/DEPLOYMENT.md), and [development roadmap](docs/ROADMAP.md).
+See [frontend instructions](web/README.md), [API instructions](server/README.md), [local two-device test guide](docs/LOCAL_TESTING.md), [deployment instructions](docs/DEPLOYMENT.md), and [development roadmap](docs/ROADMAP.md).
 
 ## Documentation
 

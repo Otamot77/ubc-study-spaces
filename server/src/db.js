@@ -83,8 +83,10 @@ export function occupancy(db, spaceId, now = Date.now()) {
   for (const row of rows) counts[row.level]++
   const maxVotes = Math.max(...Object.values(counts))
   const winners = Object.keys(counts).filter((level) => counts[level] === maxVotes)
-  // Disagreement without a majority is explicitly unknown, not guessed.
-  const busyness = winners.length === 1 ? winners[0] : 'unknown'
+  // A unique plurality is not necessarily a majority (e.g. 3-2-2).
+  // Do not imply a reliable status unless more than half agree.
+  const busyness = winners.length === 1 && maxVotes * 2 > rows.length
+    ? winners[0] : 'unknown'
   const confidence = busyness === 'unknown' || rows.length < 3
     ? 'low' : rows.length < 5 || maxVotes / rows.length < 0.7 ? 'medium' : 'high'
 

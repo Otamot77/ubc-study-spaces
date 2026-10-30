@@ -121,3 +121,13 @@ test('stale and revoked reports disappear without changing other buildings', asy
     assert.equal((await getSpace(base, 'woodward')).recentReportCount, 0)
   })
 })
+
+test('network-wide abuse cap still applies to rapidly rotating reporter IDs', () => {
+  const limit = createRateLimiter()
+  for (let i = 0; i < 60; i++) {
+    const id = i.toString(16).padStart(32, '0')
+    assert.equal(limit('127.0.0.4', 'law', 100_000 + i, id), true)
+  }
+  assert.equal(limit('127.0.0.4', 'law', 100_061, 'f'.repeat(32)), false)
+  assert.equal(limit('127.0.0.4', 'law', 100_000 + 3_600_001, 'f'.repeat(32)), true)
+})

@@ -65,3 +65,7 @@ Select **From → Choose starting point** or tap **Closest**, choose a building,
 A production container serves the built frontend and API from one origin. If `GET /api/config` indicates an invite-only beta, the report sheet shows a password-style access-code input. The code is held only in the current app memory and sent as a request header for report writes. See [deployment guide](../docs/DEPLOYMENT.md). Browser GPS can be tested on an HTTPS hosted site; nothing has been deployed yet.
 
 The research trail for these listings is maintained in [Study-space data audit](../docs/STUDY_SPACE_DATA.md). Library hours vary by date, so the app deliberately links to the official hours page instead of claiming any location is currently open.
+
+## Local multi-device testing
+
+Use [the two-phone QA checklist](../docs/LOCAL_TESTING.md). Browsers get a random per-session, non-identifying reporter ID so devices sharing the Vite proxy can report independently. IDs are held in sessionStorage and sent only to the reporting API; they are not accounts or location data. The list and map remain available on the same Wi-Fi. Run `cd server; npm run test:devices` for a reproducible simulated smoke test without writing into your normal SQLite file.

@@ -71,3 +71,13 @@ This is a working plan, not a fixed commitment. Each milestone should produce a 
 - [x] Education Learning Commons confirmed as a named open study space in university sources
 - [ ] Education Learning Commons **2026–27 operational hours and access** still require confirmation; do not represent as open now
 - [ ] ICICS zone boundaries / after-hours access and library entrances should be validated during campus walkthrough
+
+## 2026-10-30 — Local MVP testing and search
+
+- [x] Search Explore study spaces by name and abbreviation, including Indigenous Unicode-aware matching
+- [x] Filter by five crowdsourced status values; no assumed availability when status is Unknown
+- [x] Confirm ICICS study-zone existence through UBC Computer Science, retain Education access caveat
+- [x] Add per-browser-session local cooldowns, network-wide abuse cap and majority-only occupancy classification
+- [x] Simulate concurrent browser reports, corrections, undo and aging in CI with in-memory SQLite
+- [x] Add a reproducible local two-device smoke command and manual on-device QA checklist
+- [ ] **Physical two-phone test** must be performed on the developer's Wi-Fi devices; cannot be certified by a headless CI run

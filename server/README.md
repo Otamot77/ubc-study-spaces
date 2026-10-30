@@ -22,11 +22,11 @@ The SQLite database is created automatically at `server/data/study-spaces.sqlite
 
 The UI submits on the first tap. Tapping the already-selected option again **revokes the report's vote**, so it disappears from occupancy counts; tapping a different option selects or changes it. A revoked report can be restored within the same two-minute correction window with the same private token, without bypassing the initial submission cooldown or double-counting. The edit token is held only in the active form, not in browser storage. Older reports are migrated automatically when the API starts. Correcting a vote never changes its original timestamp or extends its 45-minute lifetime.
 
-After 45 minutes without recent reports, status becomes **unknown**. A two-way tie also returns unknown. The response includes report count, freshness, and coarse confidence.
+After 45 minutes without recent reports, status becomes **unknown**. A tie or an otherwise insufficient absolute majority (for example a 3–2–2 split) also returns unknown. The response includes report count, freshness, and coarse confidence.
 
 ## Limits and privacy
 
-This is a **local development prototype**, not a deploy-ready public reporting service. It does not authenticate students, confirm they are on campus, or guarantee accuracy. Cooldown is in-memory per network IP (30 seconds per space, 20 reports per hour). This is a light deterrent, not a security boundary; shared campus NATs could experience collisions and restarts reset cooldowns. Raw IP addresses are never written to the SQLite reports table.
+This is a **local development prototype**, not a deploy-ready public reporting service. It does not authenticate students, confirm they are on campus, or guarantee accuracy. Cooldown is in-memory per anonymous browser session (30 seconds per space, 20 reports per hour) with a shared network-wide cap of 60 accepted reports per hour. Without a valid session ID, the original per-IP cooldown applies. This is a light deterrent, not a security boundary; shared campus NATs could experience collisions and restarts reset cooldowns. Raw IP addresses are never written to the SQLite reports table.
 
 Use `npm test` for aggregation, TTL, validation, and HTTP integration tests. Protect public deployment with trusted proxy configuration, authenticators or abuse controls, HTTPS, and a production database/backup plan.
 
@@ -35,3 +35,9 @@ Use `npm test` for aggregation, TTL, validation, and HTTP integration tests. Pro
 On a production container, set `BETA_REPORT_CODE` (minimum 12 characters) and `STUDY_SPACES_DB_PATH` on a persistent volume. Production startup fails if either is missing. `GET /api/config` returns `{"betaAccessRequired":true}`. A protected `POST` or `PATCH` must include header `X-Study-Spaces-Access` with the invite code, or the API returns 403. The frontend asks pilot testers for this code only when the server requires it, and keeps it only in active app memory. It is **not** authentication suitable for public anonymous usage.
 
 The same Node process serves the compiled frontend under `STATIC_DIR` in production, allowing browser GPS over the host's HTTPS URL. `PORT` and `HOST` can be set by the platform. See [deployment guide](../docs/DEPLOYMENT.md).
+
+### Local simulated-device regression test
+
+Run `npm run test:devices` from `server/`. This starts an **in-memory** API on a random loopback port (not your real report database), simulates two browsers making simultaneous requests, tests correction/undo/tie/cooldown, then stops the test server. It can be run without your normal Vite server. Full manual two-phone instructions are in [LOCAL_TESTING.md](../docs/LOCAL_TESTING.md).
+
+The `X-Study-Spaces-Reporter` header is a random browser-session identifier, not an account. The API still caps reports per network IP, so spoofing IDs cannot fully remove hourly limits. This is prototype-only rate limiting; do not interpret as production-grade anti-abuse or verified independent users.
